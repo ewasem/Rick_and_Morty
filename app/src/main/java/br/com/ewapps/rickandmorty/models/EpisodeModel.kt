@@ -74,4 +74,8 @@ object EpisodeData {
     fun getEpisode(id: Int): EpisodeModel{
         return episodeList.first{it.id == id}
     }
+
+    fun getAllEpisodes(): List<EpisodeModel> {
+        return episodeList
+    }
 }

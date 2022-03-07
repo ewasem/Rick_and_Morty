@@ -12,6 +12,7 @@ object MockData {
 
     )
 
+
     fun getCharacterData(characterId: Int): CharacterModel {
         return characterList.first{it.id == characterId}
     }

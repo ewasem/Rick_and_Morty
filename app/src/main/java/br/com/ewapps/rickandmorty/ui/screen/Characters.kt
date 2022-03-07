@@ -36,6 +36,7 @@ import br.com.ewapps.rickandmorty.ui.Origin
 fun Characters(navController: NavController) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "Personagens", fontWeight = FontWeight.SemiBold)
+
         LazyVerticalGrid(cells = GridCells.Adaptive(160.dp), contentPadding = PaddingValues(8.dp)) {
             items(MockData.characterList) {
                 characterData ->
