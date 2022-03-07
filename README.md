@@ -1,6 +1,6 @@
-### Rick_and_Morty
+### Rick and Morty
 
-##Em construção
+# Em construção
 
 Projeto pessoal, utilizando a API https://rickandmortyapi.com/
 
