@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.models.CharacterModel
+import br.com.ewapps.rickandmorty.models.CharacterResponse
 import br.com.ewapps.rickandmorty.models.Location
 import br.com.ewapps.rickandmorty.ui.MockData
 import br.com.ewapps.rickandmorty.models.Origin
@@ -35,18 +36,19 @@ import com.skydoves.landscapist.coil.CoilImage
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Characters(navController: NavController, characters: List<CharacterModel>) {
+fun Characters(navController: NavController, characters: MutableList<CharacterModel>?, totaCharacters: Int?) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Personagens", fontWeight = FontWeight.SemiBold)
+        Text(text = "Total de personagens: $totaCharacters", fontWeight = FontWeight.SemiBold)
 
 
         LazyVerticalGrid(cells = GridCells.Adaptive(160.dp), contentPadding = PaddingValues(8.dp)) {
-            items(characters.size) {
-                        index ->
-                    CharacterItem(characterData =  characters[index], onCharacterClicked = {
+            if (characters != null) {
+                items(characters.size) { index ->
+                    CharacterItem(characterData = (characters[index]), onCharacterClicked = {
                         navController.navigate("CharacterDetailScreen/${index}")
                     })
                 }
+            }
 
         }
     }

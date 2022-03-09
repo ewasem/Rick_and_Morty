@@ -14,16 +14,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.ewapps.rickandmorty.ui.MainViewModel
 import br.com.ewapps.rickandmorty.ui.RickAndMortyApp
 import br.com.ewapps.rickandmorty.ui.theme.RickAndMortyTheme
 
 class MainActivity : ComponentActivity() {
 
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
+        viewModel.getInfo()
 
         setContent {
             RickAndMortyTheme {
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    RickAndMortyApp()
+                    RickAndMortyApp(viewModel)
                 }
             }
         }
@@ -44,6 +46,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     RickAndMortyTheme {
-        RickAndMortyApp()
+        RickAndMortyApp(viewModel())
     }
 }

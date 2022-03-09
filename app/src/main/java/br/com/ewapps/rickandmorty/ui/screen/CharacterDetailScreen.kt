@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.models.CharacterModel
+import br.com.ewapps.rickandmorty.models.CharacterResponse
 import br.com.ewapps.rickandmorty.models.Location
 import br.com.ewapps.rickandmorty.models.Origin
 import br.com.ewapps.rickandmorty.ui.*
