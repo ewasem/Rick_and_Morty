@@ -113,7 +113,6 @@ fun CharacterDetailScreen(navController: NavController, characterData: Character
                                 } else {
                                     if (list.isEmpty()) {
                                         tempAnt = temp
-                                        list.clear()
                                         list.add(epi)
                                     } else {
                                         Column(

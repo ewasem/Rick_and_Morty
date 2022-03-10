@@ -7,7 +7,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomMenuScreen(val route: String, val icon: ImageVector, val title: String) {
-    object Characters: BottomMenuScreen("Characters", Icons.Outlined.Person, "Personagem")
+    object Characters: BottomMenuScreen("Characters", Icons.Outlined.Person, "Personagens")
     object Episodes: BottomMenuScreen("Episodes", Icons.Outlined.DesktopWindows, "Episódios")
     object Locations: BottomMenuScreen("Locations", Icons.Outlined.LocationOn, "Lugares")
 

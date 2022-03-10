@@ -6,6 +6,7 @@ data class Episode(
     val episodes: String
 )
 
+
 object EpisodeData {
     private val episodeList = listOf<Episode>(
         Episode(1, "01", "01"),
