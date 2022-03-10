@@ -1,16 +1,13 @@
 package br.com.ewapps.rickandmorty.ui
 
-import br.com.ewapps.rickandmorty.R
-import br.com.ewapps.rickandmorty.models.CharacterModel
-import br.com.ewapps.rickandmorty.models.Location
-import br.com.ewapps.rickandmorty.models.Origin
+import br.com.ewapps.rickandmorty.models.Character
 
 object MockData {
-    val characterList = listOf<CharacterModel>(
+    val characterList = listOf<Character>(
          )
 
 
-    fun getCharacterData(characterId: Int): CharacterModel {
+    fun getCharacterData(characterId: Int): Character {
         return characterList.first{it.id == characterId}
     }
 }

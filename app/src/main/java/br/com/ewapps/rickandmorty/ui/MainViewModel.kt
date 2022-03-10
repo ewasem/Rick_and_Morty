@@ -6,12 +6,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ewapps.rickandmorty.MainApp
-import br.com.ewapps.rickandmorty.models.CharacterModel
+import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.models.CharacterResponse
 import br.com.ewapps.rickandmorty.models.InfoResponse
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -32,16 +34,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isLoading: StateFlow<Boolean>
         get() = _isLoading
 
+    //Variável de controle em caso de erro
+    private val _isError = MutableStateFlow(false)
+    val isError: StateFlow<Boolean>
+        get() = _isError
+
+    //variável que em caso de erro, atualiza a variável de controle _isError para verdadeiro
+    private val errorHandler = CoroutineExceptionHandler { _, error ->
+        if (error is Exception) {
+            _isError.value = true
+        }
+    }
+
     //Função que pega os dados de páginas e total de personagens
     fun getInfo() {
         _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _infoResponse.value = repository.getInfo()
             _isLoading.value = false
             _infoResponse.value.info?.pages?.let { getCharacters(it) }
             Log.d("Pages: ", "${_infoResponse.value.info!!.pages}")
         }
     }
+
     //Coleta as informações ao inicializar a viewModel
     init {
         getInfo()
@@ -92,7 +107,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //armazena todos os personagens para depois atualizar a lista de personagens que irá aparecer na tela
-    private var charList = mutableListOf<CharacterModel>()
+    private var charList = mutableListOf<Character>()
 
     val result = snapshotFlow { _characterList }
 
@@ -100,7 +115,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //Função que coleta todos os personagens da API
     fun getCharacters(pages: Int) {
         _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
             if (_characterList.value.result.isNullOrEmpty()) {
                 var i = 1
                 while (i <= pages) {

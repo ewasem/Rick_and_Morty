@@ -1,30 +1,18 @@
 package br.com.ewapps.rickandmorty.ui
 
-import android.annotation.SuppressLint
-import android.app.Application
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import br.com.ewapps.rickandmorty.MainActivity
-import br.com.ewapps.rickandmorty.MainApp
 import br.com.ewapps.rickandmorty.components.BottomMenu
-import br.com.ewapps.rickandmorty.models.CharacterModel
-import br.com.ewapps.rickandmorty.models.CharacterResponse
-import br.com.ewapps.rickandmorty.network.ApiClient
-import br.com.ewapps.rickandmorty.network.AppManager
+import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.ui.screen.*
 
 @Composable
@@ -56,17 +44,19 @@ fun Navigation(
     navController: NavHostController,
     viewModel: MainViewModel
 ) {
+    val loading by viewModel.isLoading.collectAsState()
+    val error by viewModel.isError.collectAsState()
     val totalCharacters by viewModel.infoResponse.collectAsState()
-
     val teste = viewModel.result.collectAsState(null).value
 
     //val charactersState by viewModel.characterList.collectAsState()
 
     val characters = teste?.collectAsState()?.value?.result
 
-
     NavHost(navController = navController, startDestination = "Characters") {
-        bottomNavigation(navController = navController, characters, totalCharacters.info?.count, viewModel)
+        val isLoading = mutableStateOf(loading)
+        val isError = mutableStateOf(error)
+        bottomNavigation(navController = navController, characters, totalCharacters.info?.count, viewModel, isLoading = isLoading, isError = isError)
 
         composable(
             "CharacterDetailScreen/{index}",
@@ -86,12 +76,14 @@ fun Navigation(
 
 fun NavGraphBuilder.bottomNavigation(
     navController: NavController,
-    characters: List<CharacterModel>?,
+    characters: List<Character>?,
     totalCharacters: Int?,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     composable(BottomMenuScreen.Characters.route) {
-        Characters(navController = navController, characters = characters, totalCharacters, viewModel)
+        Characters(navController = navController, characters = characters, totalCharacters, viewModel, isLoading, isError)
     }
     composable(BottomMenuScreen.Episodes.route) {
         Episodes(navController = navController)

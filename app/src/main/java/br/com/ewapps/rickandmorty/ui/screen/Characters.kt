@@ -12,6 +12,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -27,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
-import br.com.ewapps.rickandmorty.models.CharacterModel
+import br.com.ewapps.rickandmorty.components.ErrorUI
+import br.com.ewapps.rickandmorty.components.LoadingUI
+import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.ui.MainViewModel
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.launch
@@ -38,9 +41,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun Characters(
     navController: NavController,
-    characters: List<CharacterModel>?,
+    characters: List<Character>?,
     totalCharacters: Int?,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     println(characters?.size)
 
@@ -80,28 +85,45 @@ fun Characters(
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
+    when {
+        isLoading.value -> {
+            LoadingUI()
+        }
+        isError.value -> {
+            ErrorUI()
+        }
+        else -> {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
 
-        LazyVerticalGrid(
-            cells = GridCells.Adaptive(160.dp),
-            contentPadding = PaddingValues(8.dp),
-            state = listState
-        ) {
-            if (characters != null) {
-                items(characters.size) { index ->
-                    CharacterItem(characterData = (characters[index]), onCharacterClicked = {
-                        navController.navigate("CharacterDetailScreen/${index}")
-                    })
+                LazyVerticalGrid(
+                    cells = GridCells.Adaptive(160.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    state = listState
+                ) {
+                    if (characters != null) {
+                        items(characters.size) { index ->
+                            CharacterItem(
+                                characterData = (characters[index]),
+                                onCharacterClicked = {
+                                    navController.navigate("CharacterDetailScreen/${index}")
+                                })
+                        }
+                    }
+
                 }
             }
-
         }
     }
+
+
 }
 
 @Composable
-fun CharacterItem(characterData: CharacterModel, onCharacterClicked: () -> Unit = {}) {
+fun CharacterItem(characterData: Character, onCharacterClicked: () -> Unit = {}) {
     Card(shape = MaterialTheme.shapes.medium, elevation = 6.dp, modifier = Modifier
         .size(100.dp, 160.dp)
         .padding(8.dp)
