@@ -2,6 +2,7 @@ package br.com.ewapps.rickandmorty.ui
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ewapps.rickandmorty.MainApp
@@ -9,9 +10,7 @@ import br.com.ewapps.rickandmorty.models.CharacterModel
 import br.com.ewapps.rickandmorty.models.CharacterResponse
 import br.com.ewapps.rickandmorty.models.InfoResponse
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
@@ -42,6 +41,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _infoResponse.value.info?.pages?.let { getCharacters(it) }
             Log.d("Pages: ", "${_infoResponse.value.info!!.pages}")
         }
+    }
+    //Coleta as informações ao inicializar a viewModel
+    init {
+        getInfo()
     }
 
     //Armazena a Lista com todos os personagens
@@ -91,6 +94,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //armazena todos os personagens para depois atualizar a lista de personagens que irá aparecer na tela
     private var charList = mutableListOf<CharacterModel>()
 
+    val result = snapshotFlow { _characterList }
+
+
     //Função que coleta todos os personagens da API
     fun getCharacters(pages: Int) {
         _isLoading.value = true
@@ -100,13 +106,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 while (i <= pages) {
                     _characterResponse = repository.getCharacters(i)
                     _characterResponse.result?.let { charList.addAll(it) }
-
+                    _characterList.update { CharacterResponse(charList) }
                     _isLoading.value = false
-                    Log.d("Valor de i: ", "$i")
                     i++
                 }
-                _characterList.update { CharacterResponse(charList) }
-                Log.d("Teste:", "${charList.size}")
             }
         }
     }

@@ -1,7 +1,6 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,7 +31,6 @@ import br.com.ewapps.rickandmorty.models.CharacterModel
 import br.com.ewapps.rickandmorty.ui.MainViewModel
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.launch
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -41,9 +39,12 @@ import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities
 fun Characters(
     navController: NavController,
     characters: List<CharacterModel>?,
-    totaCharacters: Int?,
+    totalCharacters: Int?,
     viewModel: MainViewModel
 ) {
+    println(characters?.size)
+
+    var total = totalCharacters ?: 0
     //Para utilizar scroolToItem, é necessário usar coroutine
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,7 +81,7 @@ fun Characters(
     }
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Total de personagens: $totaCharacters", fontWeight = FontWeight.SemiBold)
+        Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
 
         LazyVerticalGrid(
             cells = GridCells.Adaptive(160.dp),

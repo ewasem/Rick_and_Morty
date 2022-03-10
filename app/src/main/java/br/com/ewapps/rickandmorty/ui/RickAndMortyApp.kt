@@ -56,14 +56,14 @@ fun Navigation(
     navController: NavHostController,
     viewModel: MainViewModel
 ) {
-
-
     val totalCharacters by viewModel.infoResponse.collectAsState()
 
+    val teste = viewModel.result.collectAsState(null).value
 
-    val charactersState by viewModel.characterList.collectAsState()
+    //val charactersState by viewModel.characterList.collectAsState()
 
-    val characters = charactersState.result
+    val characters = teste?.collectAsState()?.value?.result
+
 
     NavHost(navController = navController, startDestination = "Characters") {
         bottomNavigation(navController = navController, characters, totalCharacters.info?.count, viewModel)

@@ -19,7 +19,7 @@ import br.com.ewapps.rickandmorty.ui.EpisodeData
 fun Episodes(navController: NavController) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "Episódios", fontWeight = FontWeight.SemiBold)
-/*
+
         val episodeList = EpisodeData.getAllEpisodes()
         val list: MutableList<String> = mutableListOf()
         var tempAnt = "01"
@@ -55,6 +55,6 @@ fun Episodes(navController: NavController) {
                     }
                 }
             }
-        }*/
+        }
     }
 }
