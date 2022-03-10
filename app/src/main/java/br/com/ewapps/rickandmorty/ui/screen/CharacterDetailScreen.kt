@@ -56,9 +56,6 @@ fun CharacterDetailScreen(navController: NavController, characterData: Character
                 modifier = Modifier.fillMaxSize()
             )
 
-
-
-
             Card(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
