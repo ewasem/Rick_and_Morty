@@ -19,11 +19,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.models.Character
-import br.com.ewapps.rickandmorty.models.EpisodeData
+import br.com.ewapps.rickandmorty.models.Season
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 fun CharacterDetailScreen(navController: NavController, characterData: Character) {
+
 
     Scaffold(topBar = {
         DetailTopAppBar(onBackPressed = { navController.popBackStack() })
@@ -90,106 +91,15 @@ fun CharacterDetailScreen(navController: NavController, characterData: Character
                             .fillMaxWidth()
                             .padding(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            var tempAnt = "01"
-                            val list: MutableList<String> = mutableListOf()
-                            for (i in characterData.episode.indices) {
-
-                                val episodeNumber =
-                                    characterData.episode[i].substringAfterLast("/").toInt()
-
-                                val temp =
-                                    EpisodeData.getEpisode(episodeNumber).season
-                                val epi =
-                                    EpisodeData.getEpisode(episodeNumber).episodes
-
-                                println("episódios: $episodeNumber - Temporada $temp ep. $epi")
-                                if (temp == tempAnt) {
-                                    list.add(epi)
-                                } else {
-                                    if (list.isEmpty()) {
-                                        tempAnt = temp
-                                        list.add(epi)
-                                    } else {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                text = "Temporada $tempAnt",
-                                                color = Color.White,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Card(
-                                                shape = RoundedCornerShape(20.dp),
-                                                backgroundColor = Color.White,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(10.dp)
-                                            ) {
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxSize(),
-                                                    horizontalAlignment = Alignment.CenterHorizontally
-                                                ) {
-                                                    list.forEach {
-                                                        Text(
-                                                            text = "Episódio $it",
-                                                            Modifier.padding(3.dp)
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        tempAnt = temp
-                                        list.clear()
-                                        list.add(epi)
-                                    }
-                                }
-                                if (characterData.episode.lastIndex == i) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = "Temporada $tempAnt",
-                                            color = Color.White,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Card(
-                                            shape = RoundedCornerShape(20.dp),
-                                            backgroundColor = Color.White,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(10.dp)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxSize(),
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                list.forEach {
-                                                    Text(text = "Episódio $it")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
+                        //TODO
                     }
                 }
             }
         }
     }
 }
+
+
 
 
 @Composable
