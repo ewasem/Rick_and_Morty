@@ -1,17 +1,14 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
-import android.graphics.Paint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.models.Season
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Episodes(navController: NavController, episodeList: List<Season>?) {
@@ -31,17 +27,15 @@ fun Episodes(navController: NavController, episodeList: List<Season>?) {
             LazyColumn(Modifier.background(color = Color.Gray)) {
                 if (episodeList != null) {
                     items(episodeList.size) { index ->
-                        SeasonItem(item = episodeList[index])
+                        SeasonItem(item = episodeList[index], onEpisodeClicked = { id: Int, season: String, episode: String ->  navController.navigate("EpisodeDetailScreen/${id}/${season}/${episode}") })
                     }
                 }
             }
         }
     }
 
-
-
 @Composable
-fun SeasonItem(item: Season) {
+fun SeasonItem(item: Season, onEpisodeClicked: (id: Int, season: String, episode: String) -> Unit = { _, _, _ ->}) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "Temporada ${item.season}", color = Color.White)
@@ -62,7 +56,7 @@ fun SeasonItem(item: Season) {
                         backgroundColor = Color.LightGray,
                         elevation = 3.dp
                     ) {
-                        Row(Modifier.padding(4.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.padding(4.dp).clickable { onEpisodeClicked(item.episodes[i].episodeId!!, item.season!!, item.episodes[i].episodeNumber!!) }, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                             Text(text = "Episódio ${item.episodes[i].episodeNumber} - ${item.episodes[i].episodeName}",  Modifier.padding(5.dp), textAlign = TextAlign.Center)
                         }
                     }

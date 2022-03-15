@@ -2,6 +2,7 @@ package br.com.ewapps.rickandmorty.ui.screen
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -23,7 +25,11 @@ import br.com.ewapps.rickandmorty.models.Season
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun CharacterDetailScreen(navController: NavController, characterData: Character) {
+fun CharacterDetailScreen(
+    navController: NavController,
+    characterData: Character,
+    seasonEpisodes: List<Season>
+) {
 
 
     Scaffold(topBar = {
@@ -91,15 +97,35 @@ fun CharacterDetailScreen(navController: NavController, characterData: Character
                             .fillMaxWidth()
                             .padding(10.dp)
                     ) {
-                        //TODO
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(5.dp)) {
+                            seasonEpisodes.forEach {seasonNumber->
+                                seasonNumber.season?.let { it1 -> Text(text = "Temporada $it1", color = Color.White, textAlign = TextAlign.Center) }
+                                Card(
+                                    shape = RoundedCornerShape(20.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(5.dp)) {
+                                        seasonNumber.episodes.forEach {
+                                            Text(
+                                                text = "Episódio: ${it.episodeNumber} - ${it.episodeName}",
+                                                Modifier.clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}/${seasonNumber.season}/${it.episodeNumber}") }, textAlign = TextAlign.Center)
+                                        }
+                                    }
+
+
+                                }
+                            }
+                        }
                     }
+
                 }
             }
         }
     }
 }
-
-
 
 
 @Composable

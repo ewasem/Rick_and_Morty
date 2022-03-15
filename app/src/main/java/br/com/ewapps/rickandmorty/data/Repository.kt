@@ -8,4 +8,5 @@ class Repository (private val manager: AppManager) {
     suspend fun getInfo() = manager.getInfo()
     suspend fun getInfoEpisodes() = manager.getInfoEpisodes()
     suspend fun getEpisodes(page: Int) = manager.getEpisodes(pages = page)
+    suspend fun getTmdbData(season: String, episodes: String) = manager.getTmdbData(season = season, episode = episodes)
 }

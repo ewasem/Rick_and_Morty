@@ -108,12 +108,11 @@ fun Characters(
                         items(characters.size) { index ->
                             CharacterItem(
                                 characterData = (characters[index]),
-                                onCharacterClicked = {
-                                    navController.navigate("CharacterDetailScreen/${index}")
+                                onCharacterClicked = { id ->
+                                    navController.navigate("CharacterDetailScreen/${id}")
                                 })
                         }
                     }
-
                 }
             }
         }
@@ -123,12 +122,12 @@ fun Characters(
 }
 
 @Composable
-fun CharacterItem(characterData: Character, onCharacterClicked: () -> Unit = {}) {
+fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Unit = {}) {
     Card(shape = MaterialTheme.shapes.medium, elevation = 6.dp, modifier = Modifier
         .size(100.dp, 160.dp)
         .padding(8.dp)
         .clickable {
-            onCharacterClicked()
+            onCharacterClicked(characterData.id)
         }) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
