@@ -2,7 +2,6 @@ package br.com.ewapps.rickandmorty.ui.screen
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,14 +21,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.models.Character
-import br.com.ewapps.rickandmorty.models.Season
+import br.com.ewapps.rickandmorty.models.SeasonTmdb
+import coil.compose.AsyncImage
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 fun CharacterDetailScreen(
     navController: NavController,
     characterData: Character,
-    seasonEpisodes: List<Season>
+    seasonEpisodes: List<SeasonTmdb>
 ) {
 
 
@@ -43,13 +44,10 @@ fun CharacterDetailScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            CoilImage(
-                imageModel = characterData.image,
+            AsyncImage(model = characterData.image,
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
-                error = ImageBitmap.imageResource(
-                    id = R.drawable.error
-                ),
-                placeHolder = ImageBitmap.imageResource(
+                placeholder = painterResource(
                     id = R.drawable.error
                 ),
                 modifier = Modifier.fillMaxSize()
@@ -99,7 +97,7 @@ fun CharacterDetailScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(5.dp)) {
                             seasonEpisodes.forEach {seasonNumber->
-                                seasonNumber.season?.let { it1 -> Text(text = "Temporada $it1", color = Color.White, textAlign = TextAlign.Center) }
+                                seasonNumber.name?.let { it1 -> Text(text =it1, color = Color.White, textAlign = TextAlign.Center) }
                                 Card(
                                     shape = RoundedCornerShape(20.dp),
                                     modifier = Modifier
@@ -108,19 +106,16 @@ fun CharacterDetailScreen(
 
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(5.dp)) {
-                                        seasonNumber.episodes.forEach {
+                                        seasonNumber.episodes?.forEach {
                                             Text(
-                                                text = "Episódio: ${it.episodeNumber} - ${it.episodeName}",
-                                                Modifier.clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}/${seasonNumber.season}/${it.episodeNumber}") }, textAlign = TextAlign.Center)
+                                                text = "Episódio: ${it.episodeNumber} - ${it.name}",
+                                                Modifier.clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }, textAlign = TextAlign.Center)
                                         }
                                     }
-
-
                                 }
                             }
                         }
                     }
-
                 }
             }
         }

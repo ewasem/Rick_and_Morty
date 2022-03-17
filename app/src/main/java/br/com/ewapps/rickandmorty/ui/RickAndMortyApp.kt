@@ -10,10 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import br.com.ewapps.rickandmorty.components.BottomMenu
-import br.com.ewapps.rickandmorty.models.Character
-import br.com.ewapps.rickandmorty.models.Episode
-import br.com.ewapps.rickandmorty.models.Season
+import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
+import kotlinx.coroutines.flow.forEach
 
 @Composable
 fun RickAndMortyApp(viewModel: MainViewModel) {
@@ -47,11 +46,10 @@ fun Navigation(
     val totalCharacters by viewModel.infoResponse.collectAsState()
     val characterResponse = viewModel.resultCharacterList.collectAsState(null).value
 
-    val episodeList = viewModel.episodeList.collectAsState().value.result
-    val allEpisode = viewModel.resultEpisodeList.collectAsState(null).value
-    val episodes = allEpisode?.collectAsState()?.value
     val characters = characterResponse?.collectAsState()?.value?.result
-    val tmdbData = viewModel.tmdbData.collectAsState(null).value
+
+    val allEpisodes = viewModel.allEpisodes.collectAsState(initial = null).value
+    val allEpisodeList = allEpisodes?.collectAsState()?.value
 
     NavHost(navController = navController, startDestination = "Characters") {
         val isLoading = mutableStateOf(loading)
@@ -64,76 +62,118 @@ fun Navigation(
             viewModel,
             isLoading = isLoading,
             isError = isError,
-            episodeList = episodes
+            episodeList = allEpisodeList
         )
 
         composable(
             "CharacterDetailScreen/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) {
+            val list = mutableListOf<EpisodeTmdb>()
+            val seasonEpisodes = mutableListOf<SeasonTmdb>()
             val id = it.arguments?.getInt("id")
             id.let {
                 var character = characters!![0]
-                val list = mutableListOf<Episode>()
                 //Procura o personagem pelo id
                 characters.forEach {
                     if (it.id == id) {
                         character = it
-                        val episodesForSeason = character.episode
+                        val characterEpisodes = character.episode
 
                         //pega a lista de episódios do personagem
-                        episodesForSeason.forEach {
+                        characterEpisodes.forEach {
                             val episodeId = it.substringAfterLast("/").toInt()
-                            viewModel.episodeList.value.result?.forEach {
-                                if (it.id == episodeId) {
-                                    list.add(it)
+                            allEpisodeList?.forEach {
+                                it.episodes?.forEach {
+                                    if (it.episodeId == episodeId) {
+                                        list.add(it)
+                                    }
                                 }
                             }
                         }
+                        var season = 0
+                        var listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
+                        for (i in list.indices) {
+
+                            if (season == list[i].seasonNumber) {
+                                listEpisodesPerSeason.add(list[i])
+                            } else {
+                                if (listEpisodesPerSeason.isNotEmpty()) {
+                                    allEpisodeList!!.forEach {
+                                        if(it.seasonNumber == season) {
+                                            seasonEpisodes.add(
+                                                SeasonTmdb(
+                                                    it.air_date,
+                                                    listEpisodesPerSeason,
+                                                    it.name,
+                                                    it.overview,
+                                                    it.posterPath,
+                                                    it.seasonNumber
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                season = list[i].seasonNumber!!
+                                listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
+                                listEpisodesPerSeason.add(list[i])
+                            }
+                            if (list.lastIndex == i) {
+                                if (listEpisodesPerSeason.isNotEmpty()) {
+                                    allEpisodeList!!.forEach {
+                                        if(it.seasonNumber == season) {
+                                            seasonEpisodes.add(
+                                                SeasonTmdb(
+                                                    it.air_date,
+                                                    listEpisodesPerSeason,
+                                                    it.name,
+                                                    it.overview,
+                                                    it.posterPath,
+                                                    it.seasonNumber
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
                     }
                 }
-                val seasonEpisodes = viewModel.getEpisodesinSeasonFormat(list = list)
-
                 CharacterDetailScreen(navController, characterData = character, seasonEpisodes)
             }
         }
 
+
         composable(
-            "EpisodeDetailScreen/{id}/{season}/{episode}",
+            "EpisodeDetailScreen/{id}",
             arguments = listOf(
-                navArgument("id") { type = NavType.IntType },
-                navArgument("season") { type = NavType.StringType },
-                navArgument("episode") { type = NavType.StringType })
+                navArgument("id") { type = NavType.IntType })
         ) {
 
             val id = it.arguments?.getInt("id")
-            val season = it.arguments?.getString("season")
-            println("Temporada: $season")
+            val charList = viewModel.getCharactersFromEpisodeStringList(id!!)
+            val season = it.arguments?.getInt("season")
 
-            val episode = it.arguments?.getString("episode")
-            println("Temporada epi: $episode")
-                    viewModel.getTmdbData(season = season!!, episode = episode!!)
-
-            //Procura o episódio pelo id
-            id.let {
-                var episode: Episode = episodeList!![0]
-                episodeList.forEach {
-                    if (it.id == id) {
-                        episode = it
+            var episodeTmdb = EpisodeTmdb()
+            allEpisodeList!!.forEach {
+                it.episodes!!.forEach {
+                    if (it.episodeId == id) {
+                        episodeTmdb = it
                     }
                 }
+
                 EpisodeDetailScreen(
                     viewModel = viewModel,
-                    episode = episode,
                     navController = navController,
-                    tmdbData = tmdbData!!.collectAsState().value,
+                    episode = episodeTmdb,
                     isError = isError,
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    characterList = charList
                 )
             }
         }
     }
-
 }
 
 fun NavGraphBuilder.bottomNavigation(
@@ -143,7 +183,7 @@ fun NavGraphBuilder.bottomNavigation(
     viewModel: MainViewModel,
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>,
-    episodeList: List<Season>?
+    episodeList: List<SeasonTmdb>?
 ) {
     composable(BottomMenuScreen.Characters.route) {
         Characters(
@@ -162,3 +202,4 @@ fun NavGraphBuilder.bottomNavigation(
         Locations(navController = navController)
     }
 }
+

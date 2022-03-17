@@ -35,6 +35,7 @@ fun BottomMenu(navController: NavController) {
                 }, icon = {Icon(
                     imageVector = it.icon,
                     contentDescription = it.title)
+
                 })
         }
     }

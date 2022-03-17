@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ import br.com.ewapps.rickandmorty.components.ErrorUI
 import br.com.ewapps.rickandmorty.components.LoadingUI
 import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.ui.MainViewModel
+import coil.compose.AsyncImage
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.launch
 
@@ -117,8 +119,6 @@ fun Characters(
             }
         }
     }
-
-
 }
 
 @Composable
@@ -133,19 +133,16 @@ fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Uni
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            CoilImage(
-                imageModel = characterData.image,
+            AsyncImage(model = characterData.image,
+                contentDescription = "imagem do personagem",
                 contentScale = ContentScale.Crop,
-                error = ImageBitmap.imageResource(
-                    id = R.drawable.error
-                ),
-                placeHolder = ImageBitmap.imageResource(
+                placeholder = painterResource(
                     id = R.drawable.error
                 ),
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(100.dp, 100.dp)
-            )
+                    .size(100.dp, 100.dp))
+
             Text(fontSize = 16.sp, textAlign = TextAlign.Center, text = characterData.name)
         }
 

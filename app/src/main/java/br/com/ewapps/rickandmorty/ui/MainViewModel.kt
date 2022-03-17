@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ewapps.rickandmorty.MainApp
@@ -23,9 +24,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //Variável que recebe a lista de personagens
     private var _characterResponse = CharacterResponse()
-
-    //Variável que recebe a lista de episódios
-    private var _episodeResponse = EpisodeResponse()
 
     //Variável que recebe a quantidade de páginas e o total de personagens
     //Já que a API não possui uma rota que receba todos os personagens de uma vez
@@ -56,6 +54,42 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val _numberOfSeasons = MutableStateFlow(TmdbSeasonsInfo())
+
+    private fun getSeasons() {
+        _isLoading.value = true
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            _numberOfSeasons.value = repository.getSeasons()
+            _isLoading.value = false
+            _numberOfSeasons.value.numberOfSeasons?.let { getEpisodesFromTmdb(it) }
+        }
+
+    }
+
+    private val _allEpisodes = MutableStateFlow(mutableListOf<SeasonTmdb>())
+    val allEpisodes = snapshotFlow { _allEpisodes }
+    private val _episodes = mutableListOf<SeasonTmdb>()
+
+    private fun getEpisodesFromTmdb(seasons: Int) {
+        _isLoading.value = true
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            var i = 1
+            while (i <= seasons) {
+                _episodes.add(repository.getEpisodesFromTmdb(i))
+                i++
+            }
+            var count = 0
+            _episodes.forEach {season ->
+                season.episodes?.forEach {episode ->
+                    count ++
+                    episode.episodeId = count
+                }
+            }
+            _allEpisodes.value = _episodes
+            _isLoading.value = false
+        }
+    }
+
     //Função que pega os dados de páginas e total de personagens
     private fun getInfo() {
         _isLoading.value = true
@@ -67,31 +101,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    //função que pega os dados de páginas e número total de episódios
-    private fun getInfoEpisodes() {
-        _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO + errorHandler) {
-            _infoEpisodesResponse.value = repository.getInfoEpisodes()
-            _isLoading.value = false
-            _infoEpisodesResponse.value.info?.pages?.let { getEpisodes(it) }
-        }
-    }
-
     //Coleta as informações ao inicializar a viewModel
     init {
         getInfo()
-        getInfoEpisodes()
+        getSeasons()
     }
 
     //Armazena a Lista com todos os personagens
     private val _characterList = MutableStateFlow(CharacterResponse())
-    val characterList: StateFlow<CharacterResponse>
-        get() = _characterList
 
-    //Armazena a Lista com todos os episódios
-    private val _episodeList = MutableStateFlow(EpisodeResponse())
-    val episodeList: StateFlow<EpisodeResponse>
-        get() = _episodeList
 
     //Armazena o index da peimeira linha que aparece na tela
     private val _visibleItemIndex = MutableStateFlow(0)
@@ -135,7 +153,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //armazena todos os personagens para depois atualizar a lista de personagens que irá aparecer na tela
     private var charList = mutableListOf<Character>()
 
-    private var epList = mutableListOf<Episode>()
 
     val resultCharacterList = snapshotFlow { _characterList }
 
@@ -152,110 +169,45 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _characterList.update { CharacterResponse(charList) }
                     _isLoading.value = false
                     i++
+
                 }
             }
+            println("CharacterList $charList")
         }
     }
 
-    private val _tmdbData = MutableStateFlow(TmdbModel())
-    val tmdbData = snapshotFlow { _tmdbData}
-
-    fun getTmdbData(season: String, episode: String) {
-        _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO + errorHandler) {
-            _tmdbData.value = repository.getTmdbData(season = season, episodes = episode)
-            _isLoading.value = false
-        }
-    }
-
-    //Função que coleta todos os episódios da API
-    private fun getEpisodes(pages: Int) {
-        _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO + errorHandler) {
-            if (_episodeList.value.result.isNullOrEmpty()) {
-                var i = 1
-                while (i <= pages) {
-                    _episodeResponse = repository.getEpisodes(i)
-                    _episodeResponse.result?.let { epList.addAll(it) }
-                    _episodeList.update { EpisodeResponse(epList) }
-                    i++
-                }
-                _isLoading.value = false
-                println("episódios: ${_episodeList.value.result}")
-                _allSeasons.update { getEpisodesinSeasonFormat(epList) }
-            }
-        }
-    }
-
-    private val _allSeasons = MutableStateFlow(mutableListOf<Season>())
-
-    val resultEpisodeList = snapshotFlow { _allSeasons }
-
-
-    //Retorna a temporada extraída do formato S00E00
-    fun getSeasonFromString(episodeString: String): String {
-        return episodeString.substringAfter("S").substringBefore("E")
-    }
-
-    //Retorna o episódio extraído do formato S00E00
-    fun getEpisodeFromString(episodeString: String): String {
-        return episodeString.substringAfter("E")
-    }
+    private var _characterEpisodeString = MutableStateFlow(CharactersEpisode())
 
 
     //Retorna a lista de personagens por episódio
-    fun getCharactersEpisode(episode: Episode): List<Character> {
-        var characterList = mutableListOf<Character>()
-        episode.characters.forEach {
-            val id = it.substringAfterLast("/").toInt()
-            _characterList.value.result?.forEach {
-                if (it.id == id) characterList.add(it)
+    fun getCharactersFromEpisodeStringList(episode: Int): List<Character>{
+        _isLoading.value = true
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            _characterEpisodeString.value = repository.getCharactersFromEpisode(episode)
+            _isLoading.value = false
+        }
+        val char = mutableListOf<Character>()
+        val list = _characterEpisodeString.value.characters
+        if (list != null) {
+            list.forEach {
+                val character = it.substringAfterLast("/").toInt()
+                _characterList.value.result?.forEach {
+                    if (character == it.id) {
+                        char.add(it)
+                    }
+                }
             }
         }
-        return characterList
+        return char
     }
 
     //Retorna a data para o formato correto
     fun dateFormatter(date: String): String {
 
-        val parser = SimpleDateFormat("MMMM d, yyyy", Locale.US)
+        val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
 
         return formatter.format(parser.parse(date))
-    }
-
-    //Função que retorna a lista de episódios no formato Season
-    fun getEpisodesinSeasonFormat(list: List<Episode>): MutableList<Season> {
-
-        var temAnt = "01"
-        var count = 0
-
-        val seasonList = mutableListOf<Season>()
-        var epiList = mutableListOf<Epi>()
-        for (i in list.indices) {
-            val temp = getSeasonFromString(list[i].episode)
-            val epi = getEpisodeFromString(list[i].episode)
-            val name = list[i].name
-            val id = list[i].id
-            if (temp == temAnt) {
-                epiList.add(Epi(epi, name, id))
-            } else {
-                if (epiList.isEmpty()) {
-                    temAnt = temp
-                    epiList.add(Epi(epi, name, id))
-                } else {
-                    seasonList.add(count, Season(temAnt, epiList))
-                    count++
-                    temAnt = temp
-                    epiList = mutableListOf<Epi>()
-                    epiList.add(Epi(epi, name, id))
-                }
-            }
-            if (list.lastIndex == i) {
-                seasonList.add(count, Season(temAnt, epiList))
-            }
-        }
-        return seasonList
     }
 
 }

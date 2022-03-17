@@ -3,6 +3,7 @@ package br.com.ewapps.rickandmorty.network
 import br.com.ewapps.rickandmorty.models.*
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 
@@ -17,10 +18,10 @@ interface ApiService {
     @GET("character")
     suspend fun getInfo(): InfoResponse
 
-    @GET("episode")
-    suspend fun getInfoEpisodes(): InfoResponse
+    @GET("episode/{episodeId}")
+    suspend fun getCharacterFromEpisode(
+        @Path("episodeId") episodeId: Int,
+    ): CharactersEpisode
 
-    @GET("episode")
-    suspend fun fetchEpisodes(@Query("page") page: Int): EpisodeResponse
 
 }
