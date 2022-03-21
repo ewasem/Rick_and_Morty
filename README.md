@@ -2,6 +2,8 @@
 
 ### Em construção
 
-Projeto pessoal, utilizando a API https://rickandmortyapi.com/, também está sendo implementado acesso a API da https://www.themoviedb.org/, onde serão fornecidas imagens dos episódios, das temporadas, além de dados como nome do episódio e sinopse em português.
+Projeto pessoal, utilizando as APIs https://rickandmortyapi.com/ e https://www.themoviedb.org/.
+
+O aplicativo é um guia que fornece as informações de cada personagem e os episódios que aparecem. Tem um guia de episódios que fornece as informações como nome, sinopse, lançamento, etc. Também terá um guia com os lugares que aparecem no seriado com informações subre a localidade e os personagens residentes de cada local.
 
 Feito em Jetpack Compose, utilizando retrofit para acesso a api, MVVM e coroutines.
