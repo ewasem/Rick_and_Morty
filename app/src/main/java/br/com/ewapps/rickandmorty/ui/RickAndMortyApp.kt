@@ -70,79 +70,11 @@ fun Navigation(
             "CharacterDetailScreen/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) {
-            val list = mutableListOf<EpisodeTmdb>()
-            val seasonEpisodes = mutableListOf<SeasonTmdb>()
+
             val id = it.arguments?.getInt("id")
-            id.let {
-                var character = characters!![0]
-                //Procura o personagem pelo id
-                characters.forEach {
-                    if (it.id == id) {
-                        character = it
-                        val characterEpisodes = character.episode
+            viewModel.selectedCharacter(id!!)
+            CharacterDetailScreen(navController, viewModel)
 
-                        //pega a lista de episódios do personagem
-                        characterEpisodes.forEach {
-                            val episodeId = it.substringAfterLast("/").toInt()
-                            allEpisodeList?.forEach {
-                                it.episodes?.forEach {
-                                    if (it.episodeId == episodeId) {
-                                        list.add(it)
-                                    }
-                                }
-                            }
-                        }
-                        var season = 0
-                        var listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
-                        for (i in list.indices) {
-
-                            if (season == list[i].seasonNumber) {
-                                listEpisodesPerSeason.add(list[i])
-                            } else {
-                                if (listEpisodesPerSeason.isNotEmpty()) {
-                                    allEpisodeList!!.forEach {
-                                        if(it.seasonNumber == season) {
-                                            seasonEpisodes.add(
-                                                SeasonTmdb(
-                                                    it.air_date,
-                                                    listEpisodesPerSeason,
-                                                    it.name,
-                                                    it.overview,
-                                                    it.posterPath,
-                                                    it.seasonNumber
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                                season = list[i].seasonNumber!!
-                                listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
-                                listEpisodesPerSeason.add(list[i])
-                            }
-                            if (list.lastIndex == i) {
-                                if (listEpisodesPerSeason.isNotEmpty()) {
-                                    allEpisodeList!!.forEach {
-                                        if(it.seasonNumber == season) {
-                                            seasonEpisodes.add(
-                                                SeasonTmdb(
-                                                    it.air_date,
-                                                    listEpisodesPerSeason,
-                                                    it.name,
-                                                    it.overview,
-                                                    it.posterPath,
-                                                    it.seasonNumber
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-                CharacterDetailScreen(navController, characterData = character, seasonEpisodes)
-            }
         }
 
 

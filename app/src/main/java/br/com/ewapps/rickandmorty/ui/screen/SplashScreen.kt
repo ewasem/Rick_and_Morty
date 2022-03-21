@@ -1,7 +1,5 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
-import android.view.animation.OvershootInterpolator
-import android.window.SplashScreen
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
 import br.com.ewapps.rickandmorty.ui.theme.Color1
-import br.com.ewapps.rickandmorty.ui.theme.Color2
 
 @Composable
 fun SplashScreen(navController: NavController) {

@@ -27,7 +27,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //delayForSplash
     private val _splash = MutableStateFlow(true)
     val splash: StateFlow<Boolean>
-    get() = _splash
+        get() = _splash
 
     //Variável que recebe a lista de personagens
     private var _characterResponse = CharacterResponse()
@@ -54,6 +54,88 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (error is Exception) {
             _isError.value = true
         }
+    }
+
+    private val _selectedCharacter = MutableStateFlow(Character())
+    val selectedCharacter: StateFlow<Character>
+        get() = _selectedCharacter
+
+    private val _characterEpisodes = MutableStateFlow(mutableListOf<SeasonTmdb>())
+    val characterEpisodes: StateFlow<MutableList<SeasonTmdb>>
+        get() = _characterEpisodes
+
+    fun selectedCharacter(id: Int) {
+        val list = mutableListOf<EpisodeTmdb>()
+        val seasonEpisodes = mutableListOf<SeasonTmdb>()
+        id.let {
+
+            //Procura o personagem pelo id
+            _characterList.value.result?.forEach {
+                if (it.id == id) {
+                    _selectedCharacter.value = it
+                    val characterEpisodes = _selectedCharacter.value.episode
+
+                    //pega a lista de episódios do personagem
+                    characterEpisodes?.forEach {
+                        val episodeId = it.substringAfterLast("/").toInt()
+                        _allEpisodes.value.forEach {
+                            it.episodes?.forEach {
+                                if (it.episodeId == episodeId) {
+                                    list.add(it)
+                                }
+                            }
+                        }
+                    }
+                    var season = 0
+                    var listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
+                    for (i in list.indices) {
+
+                        if (season == list[i].seasonNumber) {
+                            listEpisodesPerSeason.add(list[i])
+                        } else {
+                            if (listEpisodesPerSeason.isNotEmpty()) {
+                                _allEpisodes.value.forEach {
+                                    if (it.seasonNumber == season) {
+                                        seasonEpisodes.add(
+                                            SeasonTmdb(
+                                                it.air_date,
+                                                listEpisodesPerSeason,
+                                                it.name,
+                                                it.overview,
+                                                it.posterPath,
+                                                it.seasonNumber
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            season = list[i].seasonNumber!!
+                            listEpisodesPerSeason = mutableListOf<EpisodeTmdb>()
+                            listEpisodesPerSeason.add(list[i])
+                        }
+                        if (list.lastIndex == i) {
+                            if (listEpisodesPerSeason.isNotEmpty()) {
+                                _allEpisodes.value.forEach {
+                                    if (it.seasonNumber == season) {
+                                        seasonEpisodes.add(
+                                            SeasonTmdb(
+                                                it.air_date,
+                                                listEpisodesPerSeason,
+                                                it.name,
+                                                it.overview,
+                                                it.posterPath,
+                                                it.seasonNumber
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        _characterEpisodes.value = seasonEpisodes
     }
 
     private val _numberOfSeasons = MutableStateFlow(TmdbSeasonsInfo())
@@ -93,9 +175,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 i++
             }
             var count = 0
-            _episodes.forEach {season ->
-                season.episodes?.forEach {episode ->
-                    count ++
+            _episodes.forEach { season ->
+                season.episodes?.forEach { episode ->
+                    count++
                     episode.episodeId = count
                 }
             }
@@ -195,7 +277,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     //Retorna a lista de personagens por episódio
-    fun getCharactersFromEpisodeStringList(episode: Int): List<Character>{
+    fun getCharactersFromEpisodeStringList(episode: Int): List<Character> {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _characterEpisodeString.value = repository.getCharactersFromEpisode(episode)

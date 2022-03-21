@@ -129,7 +129,7 @@ fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Uni
         .size(100.dp, 160.dp)
         .padding(8.dp)
         .clickable {
-            onCharacterClicked(characterData.id)
+            onCharacterClicked(characterData.id!!)
         }) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -145,7 +145,7 @@ fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Uni
                     .clip(CircleShape)
                     .size(100.dp, 100.dp))
 
-            Text(fontSize = 16.sp, textAlign = TextAlign.Center, text = characterData.name)
+            characterData.name?.let { Text(fontSize = 16.sp, textAlign = TextAlign.Center, text = it) }
         }
 
     }
