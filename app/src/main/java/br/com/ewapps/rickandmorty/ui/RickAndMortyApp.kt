@@ -42,6 +42,7 @@ fun Navigation(
     viewModel: MainViewModel
 ) {
     val loading by viewModel.isLoading.collectAsState()
+    val splash by viewModel.splash.collectAsState()
     val error by viewModel.isError.collectAsState()
     val totalCharacters by viewModel.infoResponse.collectAsState()
     val characterResponse = viewModel.resultCharacterList.collectAsState(null).value
@@ -51,7 +52,7 @@ fun Navigation(
     val allEpisodes = viewModel.allEpisodes.collectAsState(initial = null).value
     val allEpisodeList = allEpisodes?.collectAsState()?.value
 
-    NavHost(navController = navController, startDestination = "Characters") {
+    NavHost(navController = navController, startDestination = if (splash) "SplashScreen" else "Characters") {
         val isLoading = mutableStateOf(loading)
         val isError = mutableStateOf(error)
 
@@ -153,7 +154,6 @@ fun Navigation(
 
             val id = it.arguments?.getInt("id")
             val charList = viewModel.getCharactersFromEpisodeStringList(id!!)
-            val season = it.arguments?.getInt("season")
 
             var episodeTmdb = EpisodeTmdb()
             allEpisodeList!!.forEach {
@@ -173,6 +173,11 @@ fun Navigation(
                 )
             }
         }
+
+        composable("SplashScreen") {
+
+            SplashScreen(navController = navController)
+        }
     }
 }
 
@@ -186,6 +191,8 @@ fun NavGraphBuilder.bottomNavigation(
     episodeList: List<SeasonTmdb>?
 ) {
     composable(BottomMenuScreen.Characters.route) {
+
+
         Characters(
             navController = navController,
             characters = characters,
@@ -194,6 +201,8 @@ fun NavGraphBuilder.bottomNavigation(
             isLoading,
             isError
         )
+
+
     }
     composable(BottomMenuScreen.Episodes.route) {
         Episodes(navController = navController, episodeList = episodeList)

@@ -12,6 +12,7 @@ import br.com.ewapps.rickandmorty.MainApp
 import br.com.ewapps.rickandmorty.models.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -22,6 +23,12 @@ import java.util.*
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = getApplication<MainApp>().repository
 
+    //Variável que após a tela de splash, muda para falso para alterar o startDestination. Feito através da função
+    //delayForSplash
+    private val _splash = MutableStateFlow(true)
+    val splash: StateFlow<Boolean>
+    get() = _splash
+
     //Variável que recebe a lista de personagens
     private var _characterResponse = CharacterResponse()
 
@@ -31,11 +38,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var _infoResponse = MutableStateFlow(InfoResponse())
     val infoResponse: StateFlow<InfoResponse>
         get() = _infoResponse
-
-    //Recebe as informações do total de episódios e do número de páginas de episódios
-    private var _infoEpisodesResponse = MutableStateFlow(InfoResponse())
-    val infoEpisodesResponse: StateFlow<InfoResponse>
-        get() = _infoEpisodesResponse
 
     //Atualiza se os dados estão sendo baixados
     private val _isLoading = MutableStateFlow(true)
@@ -56,12 +58,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _numberOfSeasons = MutableStateFlow(TmdbSeasonsInfo())
 
+    //Esta função cria um temporizador para alterar a startDestination, pois apenas o popBackStack apenas eliminava a
+    //tela anterior, porém as outras telas não funcionavam corretamente, ele abria sempre uma nova tela, uma acima da outra
+    //deixando várias telas character, por exemplo.
+    private fun delayForSplash() {
+        viewModelScope.launch {
+            delay(3200L)
+            _splash.value = false
+        }
+    }
+
     private fun getSeasons() {
+
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _numberOfSeasons.value = repository.getSeasons()
             _isLoading.value = false
             _numberOfSeasons.value.numberOfSeasons?.let { getEpisodesFromTmdb(it) }
+
         }
 
     }
@@ -105,6 +119,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         getInfo()
         getSeasons()
+        delayForSplash()
     }
 
     //Armazena a Lista com todos os personagens

@@ -51,6 +51,8 @@ fun Characters(
 ) {
     println(characters?.size)
 
+
+
     var total = totalCharacters ?: 0
     //Para utilizar scroolToItem, é necessário usar coroutine
     val coroutineScope = rememberCoroutineScope()
