@@ -29,9 +29,7 @@ fun EpisodeDetailScreen(
     viewModel: MainViewModel,
     episode: EpisodeTmdb,
     navController: NavController,
-    characterList: List<Character>,
-    isLoading: MutableState<Boolean>,
-    isError: MutableState<Boolean>
+    characterList: List<Character>
 ) {
 
     val date = episode.air_date?.let { viewModel.dateFormatter(it) }
@@ -39,56 +37,47 @@ fun EpisodeDetailScreen(
 
     Scaffold(topBar = { EpisodeDetailTopAppBar(onBackPressed = { navController.popBackStack() }) }) {
 
-        when {
-            isLoading.value -> {
-                LoadingUI()
-            }
-            isError.value -> {
-                ErrorUI()
-            }
-            else -> {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    episode.name?.let { it1 ->
-                        Text(
-                            text = it1,
-                            Modifier.padding(top = 10.dp),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    if (date != null) {
-                        TextInformation(orientation = currentOrientation, date, episode)
-                    }
-                    episode.overview?.let { it1 ->
-                        Text(
-                            text = it1,
-                            Modifier.padding(top = 10.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Text(
-                        text = "Personagens:",
-                        Modifier.padding(top = 10.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    LazyVerticalGrid(
-                        cells = GridCells.Adaptive(160.dp),
-                        contentPadding = PaddingValues(8.dp)
-                    ) {
-                        items(characterList.size) { index ->
 
-                            CharacterItem(
-                                characterData = (characterList[index]),
-                                onCharacterClicked = {
-                                    navController.navigate("CharacterDetailScreen/${it}")
-                                })
-                        }
-                    }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            episode.name?.let { it1 ->
+                Text(
+                    text = it1,
+                    Modifier.padding(top = 10.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+            if (date != null) {
+                TextInformation(orientation = currentOrientation, date, episode)
+            }
+            episode.overview?.let { it1 ->
+                Text(
+                    text = it1,
+                    Modifier.padding(top = 10.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Text(
+                text = "Personagens:",
+                Modifier.padding(top = 10.dp),
+                textAlign = TextAlign.Center
+            )
+            LazyVerticalGrid(
+                cells = GridCells.Adaptive(160.dp),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(characterList.size) { index ->
+
+                    CharacterItem(
+                        characterData = (characterList[index]),
+                        onCharacterClicked = {
+                            navController.navigate("CharacterDetailScreen/${it}")
+                        })
                 }
             }
         }
@@ -122,8 +111,16 @@ fun TextInformation(orientation: Int, date: String, episode: EpisodeTmdb) {
         }
     } else {
         Row() {
-            Text(text = "Temporada: ${episode.seasonNumber}", Modifier.weight(1f), textAlign = TextAlign.Center)
-            Text(text = "Episódio: ${episode.episodeNumber}", Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text(
+                text = "Temporada: ${episode.seasonNumber}",
+                Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Episódio: ${episode.episodeNumber}",
+                Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
             Text(text = "Lançamento: $date", Modifier.weight(1f), textAlign = TextAlign.Center)
         }
     }

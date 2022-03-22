@@ -19,10 +19,6 @@ class AppManager(private val service: ApiService, private val tmdbService: TmdbS
         service.getCharacterFromEpisode(episodeId)
     }
 
-    suspend fun getTmdbData(season: String, episode: String): TmdbModel = withContext(Dispatchers.IO) {
-        tmdbService.getTmdbData(season, episode, BuildConfig.API_KEY, "pt-BR")
-    }
-
     suspend fun getSeasons(): TmdbSeasonsInfo = withContext(Dispatchers.IO) {
         tmdbService.getSeasons(BuildConfig.API_KEY, "pt-BR")
     }

@@ -9,14 +9,6 @@ import retrofit2.http.Query
 
 interface TmdbService {
 
-    @GET("60625/season/{season}/episode/{episode}")
-    suspend fun getTmdbData(
-        @Path("season") season: String,
-        @Path("episode") episode: String,
-        @Query("api_key") apiKey: String,
-        @Query("language") language: String
-    ) : TmdbModel
-
     @GET("60625")
     suspend fun getSeasons(
         @Query("api_key") apiKey: String,

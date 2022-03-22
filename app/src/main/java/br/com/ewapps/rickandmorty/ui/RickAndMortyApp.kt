@@ -93,8 +93,6 @@ fun Navigation(
                     viewModel = viewModel,
                     navController = navController,
                     episode = episodeSelectedData,
-                    isError = isError,
-                    isLoading = isLoading,
                     characterList = episodeCharacters
                 )
         }

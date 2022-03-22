@@ -12,12 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.models.SeasonTmdb
 import br.com.ewapps.rickandmorty.ui.theme.Color4
+import br.com.ewapps.rickandmorty.ui.theme.ColorBackground
+import coil.compose.AsyncImage
 
 @Composable
 fun Episodes(navController: NavController, episodeList: List<SeasonTmdb>?) {
@@ -40,43 +44,55 @@ fun Episodes(navController: NavController, episodeList: List<SeasonTmdb>?) {
 @Composable
 fun SeasonItem(item: SeasonTmdb, onEpisodeClicked: (id: Int) -> Unit = { _ -> }) {
 
+    val poster = "https://image.tmdb.org/t/p/w500" + item.posterPath
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.background(Color4)
     ) {
-        Text(text = "Temporada ${item.seasonNumber}", color = Color.White)
-
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            for (i in item.episodes?.indices!!) {
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = 3.dp
-                ) {
-                    Row(
-                        Modifier
-                            .padding(4.dp)
-                            .clickable {
-                                onEpisodeClicked(
-                                    item.episodes[i].episodeId!!
-                                )
-                            },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+
+            Text(text = "Temporada ${item.seasonNumber}", Modifier.padding(bottom = 8.dp), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+            Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.size(width = 250.dp, height = 350.dp)) {
+                AsyncImage(model = poster, contentDescription = "Poster Temporada", Modifier.fillMaxWidth(), contentScale = ContentScale.Crop)
+            }
+            println("Imagem poster: ${item.posterPath}")
+            item.overview?.let { Text(text = it, Modifier.padding(8.dp), color = Color.White, textAlign = TextAlign.Center) }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                for (i in item.episodes?.indices!!) {
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = 5.dp,
+                        backgroundColor = ColorBackground
                     ) {
-                        Text(
-                            text = "Episódio ${item.episodes[i].episodeNumber} - ${item.episodes[i].name}",
-                            Modifier.padding(5.dp),
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    onEpisodeClicked(
+                                        item.episodes[i].episodeId!!
+                                    )
+                                },
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Episódio ${item.episodes[i].episodeNumber} - ${item.episodes[i].name}",
+                                Modifier.padding(5.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
-            }
 
+            }
         }
+
     }
 }
 

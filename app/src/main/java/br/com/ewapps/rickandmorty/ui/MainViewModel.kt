@@ -53,14 +53,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    //Armazena os dados do personagem selecionado
     private val _selectedCharacter = MutableStateFlow(Character())
     val selectedCharacter: StateFlow<Character>
         get() = _selectedCharacter
 
+    //Armazena a lista de episódios do personagem selecionado
     private val _characterEpisodes = MutableStateFlow(mutableListOf<SeasonTmdb>())
     val characterEpisodes: StateFlow<MutableList<SeasonTmdb>>
         get() = _characterEpisodes
 
+    //Retorna os dados do personagem, assim como a lista de episódios que ele participa
     fun selectedCharacter(id: Int) {
         val list = mutableListOf<EpisodeTmdb>()
         val seasonEpisodes = mutableListOf<SeasonTmdb>()
@@ -135,13 +138,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _characterEpisodes.value = seasonEpisodes
     }
 
+    //Armazena a lista de personagens que participam no episódio
     private var _episodeCharacters = MutableStateFlow(mutableListOf<Character>())
     var episodeCharacters: StateFlow<MutableList<Character>> = _episodeCharacters
 
+    //Armazena os dados do episódio selecionado
     private val _episodeSelectedData = MutableStateFlow(EpisodeTmdb())
     val episodeSelectedData: StateFlow<EpisodeTmdb>
     get() = _episodeSelectedData
 
+    //Retorna os dados do episódio selecionado
     fun selectedEpisode(id: Int) {
         getCharactersFromEpisodeStringList(id)
         var episodeTmdb = EpisodeTmdb()
