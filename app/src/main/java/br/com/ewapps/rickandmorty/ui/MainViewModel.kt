@@ -2,10 +2,7 @@ package br.com.ewapps.rickandmorty.ui
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ewapps.rickandmorty.MainApp
@@ -136,6 +133,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         _characterEpisodes.value = seasonEpisodes
+    }
+
+    private var _episodeCharacters = MutableStateFlow(mutableListOf<Character>())
+    var episodeCharacters: StateFlow<MutableList<Character>> = _episodeCharacters
+
+    private val _episodeSelectedData = MutableStateFlow(EpisodeTmdb())
+    val episodeSelectedData: StateFlow<EpisodeTmdb>
+    get() = _episodeSelectedData
+
+    fun selectedEpisode(id: Int) {
+        getCharactersFromEpisodeStringList(id)
+        var episodeTmdb = EpisodeTmdb()
+        _allEpisodes.value.forEach {
+            it.episodes!!.forEach {
+                if (it.episodeId == id) {
+                    episodeTmdb = it
+                }
+            }
+        }
+        _episodeSelectedData.value = episodeTmdb
     }
 
     private val _numberOfSeasons = MutableStateFlow(TmdbSeasonsInfo())
@@ -277,25 +294,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     //Retorna a lista de personagens por episódio
-    fun getCharactersFromEpisodeStringList(episode: Int): List<Character> {
+    private fun getCharactersFromEpisodeStringList(episode: Int) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _characterEpisodeString.value = repository.getCharactersFromEpisode(episode)
             _isLoading.value = false
         }
         val char = mutableListOf<Character>()
-        val list = _characterEpisodeString.value.characters
-        if (list != null) {
-            list.forEach {
-                val character = it.substringAfterLast("/").toInt()
-                _characterList.value.result?.forEach {
-                    if (character == it.id) {
-                        char.add(it)
-                    }
+        _characterEpisodeString.value.characters?.forEach {
+            val character = it.substringAfterLast("/").toInt()
+            _characterList.value.result?.forEach {
+                if (character == it.id) {
+                    char.add(it)
                 }
             }
         }
-        return char
+        _episodeCharacters.value = char
     }
 
     //Retorna a data para o formato correto

@@ -31,6 +31,10 @@ import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.models.SeasonTmdb
 import br.com.ewapps.rickandmorty.ui.MainViewModel
+import br.com.ewapps.rickandmorty.ui.RickAndMortyApp
+import br.com.ewapps.rickandmorty.ui.theme.Color4
+import br.com.ewapps.rickandmorty.ui.theme.Color5
+import br.com.ewapps.rickandmorty.ui.theme.ColorBackground
 import coil.compose.AsyncImage
 import com.skydoves.landscapist.coil.CoilImage
 
@@ -39,7 +43,6 @@ fun CharacterDetailScreen(
     navController: NavController,
     viewModel: MainViewModel
 ) {
-
     val characterData = viewModel.selectedCharacter.collectAsState().value
     val seasonEpisodes = viewModel.characterEpisodes.collectAsState().value
     val currentOrientation = LocalConfiguration.current.orientation
@@ -48,7 +51,7 @@ fun CharacterDetailScreen(
         DetailTopAppBar(onBackPressed = { navController.popBackStack() })
     }) {
         Box {
-            if (currentOrientation==1) {
+            if (currentOrientation == 1) {
                 Portrait(
                     navController = navController,
                     characterData = characterData,
@@ -76,7 +79,7 @@ fun DetailTopAppBar(onBackPressed: () -> Unit = {}) {
                 onClick = { onBackPressed() }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Botão voltar")
             }
-        }, elevation = 8.dp
+        }, elevation = 5.dp
     )
 }
 
@@ -98,7 +101,8 @@ private fun Portrait(
     Column(
         Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())) {
+            .verticalScroll(rememberScrollState())
+    ) {
 
         AsyncImage(
             model = characterData.image,
@@ -198,7 +202,8 @@ private fun Portrait(
                                             text = "Episódio: ${it.episodeNumber} - ${it.name}",
                                             Modifier
                                                 .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }
-                                                .layoutId("episodeText"), textAlign = TextAlign.Center)
+                                                .layoutId("episodeText"),
+                                            textAlign = TextAlign.Center)
                                     }
                                 }
                             }
@@ -232,99 +237,97 @@ private fun Landscape(
                     .layoutId("image")
             )
         }
-        Column(modifier = Modifier.verticalScroll(rememberScrollState()).weight(1f)) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .absoluteOffset(y = (-15).dp)
-                    .layoutId("cardDetails")
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+                    .background(ColorBackground),
+
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .layoutId("columnCharacter"),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    characterData.name.let { it1 ->
-                        if (it1 != null) {
-                            Text(
-                                text = it1,
-                                Modifier
-                                    .padding(top = 10.dp)
-                                    .layoutId("characterName"),
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                characterData.name.let { it1 ->
+                    if (it1 != null) {
+                        Text(
+                            text = it1,
+                            Modifier
+                                .padding(top = 10.dp)
+                                .layoutId("characterName"),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
-                    Text(
-                        text = "Espécie: ${characterData.species}",
-                        Modifier
-                            .padding(top = 10.dp)
-                            .layoutId("species")
-                    )
-                    Text(text = "Gênero: ${characterData.gender}", Modifier.layoutId("gender"))
-                    Text(text = "Status: ${characterData.status}", Modifier.layoutId("status"))
-                    Text(
-                        text = "Origem: ${characterData.origin?.name}",
-                        Modifier.layoutId("origin")
-                    )
-                    Text(
-                        text = "Localização: ${characterData.location?.name}",
-                        Modifier.layoutId("location")
-                    )
-                    Text(
-                        text = "Lista de episódios:",
-                        Modifier
-                            .padding(top = 10.dp)
-                            .layoutId("episodesTitle"),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    )
+                }
+                Text(
+                    text = "Espécie: ${characterData.species}",
+                    Modifier
+                        .padding(top = 10.dp)
+                        .layoutId("species")
+                )
+                Text(text = "Gênero: ${characterData.gender}", Modifier.layoutId("gender"))
+                Text(text = "Status: ${characterData.status}", Modifier.layoutId("status"))
+                Text(
+                    text = "Origem: ${characterData.origin?.name}",
+                    Modifier.layoutId("origin")
+                )
+                Text(
+                    text = "Localização: ${characterData.location?.name}",
+                    Modifier.layoutId("location")
+                )
+                Text(
+                    text = "Lista de episódios:",
+                    Modifier
+                        .padding(top = 10.dp)
+                        .layoutId("episodesTitle"),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
 
-                    Card(
-                        shape = RoundedCornerShape(20.dp),
-                        backgroundColor = Color.Gray,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                            .layoutId("seasonCard")
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    backgroundColor = Color4,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .layoutId("seasonCard")
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(5.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            seasonEpisodes.forEach { seasonNumber ->
-                                seasonNumber.name?.let { it1 ->
-                                    Text(
-                                        text = it1,
-                                        Modifier.layoutId("seasonText"),
-                                        color = Color.White,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                Card(
-                                    shape = RoundedCornerShape(20.dp),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                        .layoutId("episodeCard")
+                        seasonEpisodes.forEach { seasonNumber ->
+                            seasonNumber.name?.let { it1 ->
+                                Text(
+                                    text = it1,
+                                    Modifier.layoutId("seasonText"),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Card(
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                                    .layoutId("episodeCard"), backgroundColor = ColorBackground
 
+
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(5.dp)
                                 ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.padding(5.dp)
-                                    ) {
-                                        seasonNumber.episodes?.forEach {
-                                            Text(
-                                                text = "Episódio: ${it.episodeNumber} - ${it.name}",
-                                                Modifier
-                                                    .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }
-                                                    .layoutId("episodeText"),
-                                                textAlign = TextAlign.Center)
-                                        }
+                                    seasonNumber.episodes?.forEach {
+                                        Text(
+                                            text = "Episódio: ${it.episodeNumber} - ${it.name}",
+                                            Modifier
+                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }
+                                                .layoutId("episodeText"),
+                                            textAlign = TextAlign.Center)
                                     }
                                 }
                             }
@@ -334,6 +337,7 @@ private fun Landscape(
             }
         }
     }
+
 }
 
 

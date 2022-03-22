@@ -1,10 +1,7 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.*
@@ -14,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,12 +26,16 @@ import br.com.ewapps.rickandmorty.ui.MainViewModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EpisodeDetailScreen(
-    viewModel: MainViewModel, episode: EpisodeTmdb, navController: NavController, characterList: List<Character>,
+    viewModel: MainViewModel,
+    episode: EpisodeTmdb,
+    navController: NavController,
+    characterList: List<Character>,
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>
 ) {
 
     val date = episode.air_date?.let { viewModel.dateFormatter(it) }
+    val currentOrientation = LocalConfiguration.current.orientation
 
     Scaffold(topBar = { EpisodeDetailTopAppBar(onBackPressed = { navController.popBackStack() }) }) {
 
@@ -47,19 +49,21 @@ fun EpisodeDetailScreen(
             else -> {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                 ) {
                     episode.name?.let { it1 ->
                         Text(
                             text = it1,
                             Modifier.padding(top = 10.dp),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
-                    Text(text = "Temporada: ${episode.seasonNumber}")
-                    Text(text = "Episódio: ${episode.episodeNumber}")
-                    Text(text = "Lançamento: $date")
+                    if (date != null) {
+                        TextInformation(orientation = currentOrientation, date, episode)
+                    }
                     episode.overview?.let { it1 ->
                         Text(
                             text = it1,
@@ -85,7 +89,6 @@ fun EpisodeDetailScreen(
                                 })
                         }
                     }
-
                 }
             }
         }
@@ -104,6 +107,25 @@ fun EpisodeDetailTopAppBar(onBackPressed: () -> Unit = {}) {
                     contentDescription = "Botão voltar"
                 )
             }
-        }, elevation = 8.dp
+        }, elevation = 5.dp
     )
+}
+
+@Composable
+fun TextInformation(orientation: Int, date: String, episode: EpisodeTmdb) {
+
+    if (orientation == 1) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Temporada: ${episode.seasonNumber}")
+            Text(text = "Episódio: ${episode.episodeNumber}")
+            Text(text = "Lançamento: $date")
+        }
+    } else {
+        Row() {
+            Text(text = "Temporada: ${episode.seasonNumber}", Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text(text = "Episódio: ${episode.episodeNumber}", Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text(text = "Lançamento: $date", Modifier.weight(1f), textAlign = TextAlign.Center)
+        }
+    }
+
 }

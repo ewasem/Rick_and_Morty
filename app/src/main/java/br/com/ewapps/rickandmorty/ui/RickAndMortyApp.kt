@@ -51,6 +51,8 @@ fun Navigation(
 
     val allEpisodes = viewModel.allEpisodes.collectAsState(initial = null).value
     val allEpisodeList = allEpisodes?.collectAsState()?.value
+    val episodeSelectedData = viewModel.episodeSelectedData.collectAsState().value
+    val episodeCharacters = viewModel.episodeCharacters.collectAsState().value
 
     NavHost(navController = navController, startDestination = if (splash) "SplashScreen" else "Characters") {
         val isLoading = mutableStateOf(loading)
@@ -85,25 +87,16 @@ fun Navigation(
         ) {
 
             val id = it.arguments?.getInt("id")
-            val charList = viewModel.getCharactersFromEpisodeStringList(id!!)
-
-            var episodeTmdb = EpisodeTmdb()
-            allEpisodeList!!.forEach {
-                it.episodes!!.forEach {
-                    if (it.episodeId == id) {
-                        episodeTmdb = it
-                    }
-                }
+            viewModel.selectedEpisode(id!!)
 
                 EpisodeDetailScreen(
                     viewModel = viewModel,
                     navController = navController,
-                    episode = episodeTmdb,
+                    episode = episodeSelectedData,
                     isError = isError,
                     isLoading = isLoading,
-                    characterList = charList
+                    characterList = episodeCharacters
                 )
-            }
         }
 
         composable("SplashScreen") {
