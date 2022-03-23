@@ -145,7 +145,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //Armazena os dados do episódio selecionado
     private val _episodeSelectedData = MutableStateFlow(EpisodeTmdb())
     val episodeSelectedData: StateFlow<EpisodeTmdb>
-    get() = _episodeSelectedData
+        get() = _episodeSelectedData
 
     //Retorna os dados do episódio selecionado
     fun selectedEpisode(id: Int) {
@@ -168,10 +168,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //deixando várias telas character, por exemplo.
     private fun delayForSplash() {
         viewModelScope.launch {
-            delay(3200L)
+            delay(3000L)
             _splash.value = false
         }
     }
+
 
     private fun getSeasons() {
 
@@ -186,7 +187,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private val _allEpisodes = MutableStateFlow(mutableListOf<SeasonTmdb>())
-    val allEpisodes = snapshotFlow { _allEpisodes }
+    val allEpisodes: StateFlow<MutableList<SeasonTmdb>>
+        get() = _allEpisodes
     private val _episodes = mutableListOf<SeasonTmdb>()
 
     private fun getEpisodesFromTmdb(seasons: Int) {
@@ -229,6 +231,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //Armazena a Lista com todos os personagens
     private val _characterList = MutableStateFlow(CharacterResponse())
+    val characetrList: StateFlow<CharacterResponse>
+        get() = _characterList
 
 
     //Armazena o index da peimeira linha que aparece na tela
@@ -273,10 +277,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //armazena todos os personagens para depois atualizar a lista de personagens que irá aparecer na tela
     private var charList = mutableListOf<Character>()
 
-
-    val resultCharacterList = snapshotFlow { _characterList }
-
-
     //Função que coleta todos os personagens da API
     private fun getCharacters(pages: Int) {
         _isLoading.value = true
@@ -292,12 +292,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 }
             }
-            println("CharacterList $charList")
         }
     }
 
-    private var _characterEpisodeString = MutableStateFlow(CharactersEpisode())
-
+    private val _characterEpisodeString = MutableStateFlow(CharactersEpisode())
 
     //Retorna a lista de personagens por episódio
     private fun getCharactersFromEpisodeStringList(episode: Int) {
@@ -305,26 +303,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _characterEpisodeString.value = repository.getCharactersFromEpisode(episode)
             _isLoading.value = false
-        }
-        val char = mutableListOf<Character>()
-        _characterEpisodeString.value.characters?.forEach {
-            val character = it.substringAfterLast("/").toInt()
-            _characterList.value.result?.forEach {
-                if (character == it.id) {
-                    char.add(it)
+            val char = mutableListOf<Character>()
+            _characterEpisodeString.value.characters?.forEach {
+                val character = it.substringAfterLast("/").toInt()
+                _characterList.value.result?.forEach {
+                    if (character == it.id) {
+                        char.add(it)
+                    }
                 }
             }
+            _episodeCharacters.value = char
         }
-        _episodeCharacters.value = char
     }
 
     //Retorna a data para o formato correto
     fun dateFormatter(date: String): String {
-
         val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
-
         return formatter.format(parser.parse(date))
     }
-
 }

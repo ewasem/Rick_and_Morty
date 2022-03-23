@@ -201,7 +201,9 @@ private fun Portrait(
                                         Text(
                                             text = "Episódio: ${it.episodeNumber} - ${it.name}",
                                             Modifier
-                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }
+                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
+                                                    launchSingleTop = true
+                                                } }
                                                 .layoutId("episodeText"),
                                             textAlign = TextAlign.Center)
                                     }
@@ -325,7 +327,9 @@ private fun Landscape(
                                         Text(
                                             text = "Episódio: ${it.episodeNumber} - ${it.name}",
                                             Modifier
-                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") }
+                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
+                                                    launchSingleTop = true
+                                                } }
                                                 .layoutId("episodeText"),
                                             textAlign = TextAlign.Center)
                                     }

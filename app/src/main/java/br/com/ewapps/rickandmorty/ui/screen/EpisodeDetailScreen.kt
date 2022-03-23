@@ -2,8 +2,8 @@ package br.com.ewapps.rickandmorty.ui.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -68,7 +68,7 @@ fun EpisodeDetailScreen(
                 textAlign = TextAlign.Center
             )
             LazyVerticalGrid(
-                cells = GridCells.Adaptive(160.dp),
+                GridCells.Adaptive(160.dp),
                 contentPadding = PaddingValues(8.dp)
             ) {
                 items(characterList.size) { index ->
@@ -76,7 +76,9 @@ fun EpisodeDetailScreen(
                     CharacterItem(
                         characterData = (characterList[index]),
                         onCharacterClicked = {
-                            navController.navigate("CharacterDetailScreen/${it}")
+                            navController.navigate("CharacterDetailScreen/${it}") {
+                                launchSingleTop = true
+                            }
                         })
                 }
             }

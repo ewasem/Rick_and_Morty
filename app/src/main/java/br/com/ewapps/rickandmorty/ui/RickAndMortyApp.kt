@@ -1,22 +1,25 @@
 package br.com.ewapps.rickandmorty.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.composable
 import br.com.ewapps.rickandmorty.components.BottomMenu
 import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
-import kotlinx.coroutines.flow.forEach
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RickAndMortyApp(viewModel: MainViewModel) {
-    val navController = rememberNavController()
+    val navController = rememberAnimatedNavController()
     MainScreen(navController = navController, viewModel = viewModel)
 }
 
@@ -36,6 +39,7 @@ fun MainScreen(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
     navController: NavHostController,
@@ -45,56 +49,112 @@ fun Navigation(
     val splash by viewModel.splash.collectAsState()
     val error by viewModel.isError.collectAsState()
     val totalCharacters by viewModel.infoResponse.collectAsState()
-    val characterResponse = viewModel.resultCharacterList.collectAsState(null).value
+    val characterResponse by viewModel.characetrList.collectAsState()
+    val allEpisodes by viewModel.allEpisodes.collectAsState()
+    val episodeSelectedData by viewModel.episodeSelectedData.collectAsState()
+    val episodeCharacters by viewModel.episodeCharacters.collectAsState()
 
-    val characters = characterResponse?.collectAsState()?.value?.result
-
-    val allEpisodes = viewModel.allEpisodes.collectAsState(initial = null).value
-    val allEpisodeList = allEpisodes?.collectAsState()?.value
-    val episodeSelectedData = viewModel.episodeSelectedData.collectAsState().value
-    val episodeCharacters = viewModel.episodeCharacters.collectAsState().value
-
-    NavHost(navController = navController, startDestination = if (splash) "SplashScreen" else "Characters") {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = if (splash) "SplashScreen" else "Characters"
+    ) {
         val isLoading = mutableStateOf(loading)
         val isError = mutableStateOf(error)
-
+        val totalCharacters1 = mutableStateOf(totalCharacters)
+        val characters = mutableStateOf(characterResponse)
+        val allEpisodeList = mutableStateOf(allEpisodes)
         bottomNavigation(
             navController = navController,
-            characters,
-            totalCharacters.info?.count,
+            characters.value.result,
+            totalCharacters1.value.info?.count,
             viewModel,
             isLoading = isLoading,
             isError = isError,
-            episodeList = allEpisodeList
+            episodeList = allEpisodeList.value
         )
+
 
         composable(
             "CharacterDetailScreen/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.IntType })
+            arguments = listOf(navArgument("id") { type = NavType.IntType }),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                ) + fadeIn(
+                    animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                ) + fadeOut()
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                ) + fadeIn(
+                    animationSpec = tween(1000)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                ) + fadeOut()
+            }
         ) {
 
             val id = it.arguments?.getInt("id")
             viewModel.selectedCharacter(id!!)
             CharacterDetailScreen(navController, viewModel)
-
         }
-
 
         composable(
             "EpisodeDetailScreen/{id}",
             arguments = listOf(
-                navArgument("id") { type = NavType.IntType })
+                navArgument("id") { type = NavType.IntType }),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                ) + fadeIn(
+                    animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(700)
+                ) + fadeOut()
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                ) + fadeIn(
+                    animationSpec = tween(1000)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(700)
+                ) + fadeOut()
+            }
         ) {
 
             val id = it.arguments?.getInt("id")
             viewModel.selectedEpisode(id!!)
 
-                EpisodeDetailScreen(
-                    viewModel = viewModel,
-                    navController = navController,
-                    episode = episodeSelectedData,
-                    characterList = episodeCharacters
-                )
+            EpisodeDetailScreen(
+                viewModel = viewModel,
+                navController = navController,
+                episode = episodeSelectedData,
+                characterList = episodeCharacters
+            )
         }
 
         composable("SplashScreen") {
@@ -104,6 +164,7 @@ fun Navigation(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.bottomNavigation(
     navController: NavController,
     characters: List<Character>?,
@@ -113,9 +174,35 @@ fun NavGraphBuilder.bottomNavigation(
     isError: MutableState<Boolean>,
     episodeList: List<SeasonTmdb>?
 ) {
-    composable(BottomMenuScreen.Characters.route) {
-
-
+    composable(BottomMenuScreen.Characters.route,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        }) {
         Characters(
             navController = navController,
             characters = characters,
@@ -125,12 +212,67 @@ fun NavGraphBuilder.bottomNavigation(
             isError
         )
 
-
     }
-    composable(BottomMenuScreen.Episodes.route) {
+    composable(BottomMenuScreen.Episodes.route,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        }) {
         Episodes(navController = navController, episodeList = episodeList)
     }
-    composable(BottomMenuScreen.Locations.route) {
+    composable(BottomMenuScreen.Locations.route,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Left,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeIn(
+                animationSpec = tween(1000)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentScope.SlideDirection.Right,
+                animationSpec = tween(700)
+            ) + fadeOut()
+        }) {
         Locations(navController = navController)
     }
 }

@@ -4,8 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
@@ -58,7 +59,7 @@ fun Characters(
     val coroutineScope = rememberCoroutineScope()
 
     //Inicializa a posição que a tela está
-    val listState = rememberLazyListState()
+    val listState = rememberLazyGridState()
 
     //Pega a posição atual da tela, retorna 1 para Portrait ou 2 para Landscape
     val currentOrientation = LocalConfiguration.current.orientation
@@ -104,7 +105,8 @@ fun Characters(
                 Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
 
                 LazyVerticalGrid(
-                    cells = GridCells.Adaptive(160.dp),
+
+                    GridCells.Adaptive(160.dp),
                     contentPadding = PaddingValues(8.dp),
                     state = listState
                 ) {
@@ -113,7 +115,9 @@ fun Characters(
                             CharacterItem(
                                 characterData = (characters[index]),
                                 onCharacterClicked = { id ->
-                                    navController.navigate("CharacterDetailScreen/${id}")
+                                    navController.navigate("CharacterDetailScreen/${id}") {
+                                        launchSingleTop = true
+                                    }
                                 })
                         }
                     }

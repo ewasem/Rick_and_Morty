@@ -34,7 +34,9 @@ fun Episodes(navController: NavController, episodeList: List<SeasonTmdb>?) {
                 items(episodeList.size) { index ->
                     SeasonItem(
                         item = episodeList[index],
-                        onEpisodeClicked = { id: Int-> navController.navigate("EpisodeDetailScreen/${id}") })
+                        onEpisodeClicked = { id: Int-> navController.navigate("EpisodeDetailScreen/${id}") {
+                            launchSingleTop = true
+                        } })
                 }
             }
         }

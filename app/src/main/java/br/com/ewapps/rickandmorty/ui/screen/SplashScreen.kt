@@ -1,5 +1,7 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
@@ -14,7 +16,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
+import androidx.navigation.NavHostController
+import androidx.navigation.Navigation
+import br.com.ewapps.rickandmorty.ui.MainViewModel
 import br.com.ewapps.rickandmorty.ui.theme.Color1
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -31,6 +38,7 @@ fun SplashScreen(navController: NavController) {
         delay(3000)
         navController.popBackStack()
         navController.navigate(BottomMenuScreen.Characters.route) {
+
             launchSingleTop = true
         }
 
