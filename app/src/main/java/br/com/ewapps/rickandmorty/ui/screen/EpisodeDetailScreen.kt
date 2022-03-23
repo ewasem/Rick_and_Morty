@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +24,7 @@ import br.com.ewapps.rickandmorty.components.LoadingUI
 import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.models.EpisodeTmdb
 import br.com.ewapps.rickandmorty.ui.MainViewModel
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -37,50 +40,21 @@ fun EpisodeDetailScreen(
 
     Scaffold(topBar = { EpisodeDetailTopAppBar(onBackPressed = { navController.popBackStack() }) }) {
 
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            episode.name?.let { it1 ->
-                Text(
-                    text = it1,
-                    Modifier.padding(top = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
+        if (date != null) {
+            if (currentOrientation == 1) {
+                Portrait(
+                    navController = navController,
+                    date = date,
+                    episode = episode,
+                    characterList = characterList
                 )
-            }
-            if (date != null) {
-                TextInformation(orientation = currentOrientation, date, episode)
-            }
-            episode.overview?.let { it1 ->
-                Text(
-                    text = it1,
-                    Modifier.padding(top = 10.dp),
-                    textAlign = TextAlign.Center
+            } else {
+                Landscape(
+                    navController = navController,
+                    date = date,
+                    episode = episode,
+                    characterList = characterList
                 )
-            }
-            Text(
-                text = "Personagens:",
-                Modifier.padding(top = 10.dp),
-                textAlign = TextAlign.Center
-            )
-            LazyVerticalGrid(
-                GridCells.Adaptive(160.dp),
-                contentPadding = PaddingValues(8.dp)
-            ) {
-                items(characterList.size) { index ->
-
-                    CharacterItem(
-                        characterData = (characterList[index]),
-                        onCharacterClicked = {
-                            navController.navigate("CharacterDetailScreen/${it}") {
-                                launchSingleTop = true
-                            }
-                        })
-                }
             }
         }
     }
@@ -103,28 +77,138 @@ fun EpisodeDetailTopAppBar(onBackPressed: () -> Unit = {}) {
 }
 
 @Composable
-fun TextInformation(orientation: Int, date: String, episode: EpisodeTmdb) {
+fun Portrait(
+    navController: NavController,
+    date: String,
+    episode: EpisodeTmdb,
+    characterList: List<Character>
+) {
 
-    if (orientation == 1) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Temporada: ${episode.seasonNumber}")
-            Text(text = "Episódio: ${episode.episodeNumber}")
-            Text(text = "Lançamento: $date")
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.padding(top = 10.dp), elevation = 8.dp) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500" + episode.still_path,
+                contentDescription = "Imagem do episódio",
+                contentScale = ContentScale.Crop
+            )
         }
-    } else {
-        Row() {
+
+        episode.name?.let { it1 ->
             Text(
-                text = "Temporada: ${episode.seasonNumber}",
-                Modifier.weight(1f),
+                text = it1,
+                Modifier.padding(top = 10.dp),
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
                 textAlign = TextAlign.Center
             )
+        }
+
+        Text(text = "Temporada: ${episode.seasonNumber}")
+        Text(text = "Episódio: ${episode.episodeNumber}")
+        Text(text = "Lançamento: $date")
+
+        episode.overview?.let { it1 ->
             Text(
-                text = "Episódio: ${episode.episodeNumber}",
-                Modifier.weight(1f),
+                text = it1,
+                Modifier.padding(top = 10.dp),
                 textAlign = TextAlign.Center
             )
-            Text(text = "Lançamento: $date", Modifier.weight(1f), textAlign = TextAlign.Center)
+        }
+        Text(
+            text = "Personagens:",
+            Modifier.padding(top = 10.dp),
+            textAlign = TextAlign.Center
+        )
+        LazyVerticalGrid(
+            GridCells.Adaptive(160.dp),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            items(characterList.size) { index ->
+
+                CharacterItem(
+                    characterData = (characterList[index]),
+                    onCharacterClicked = {
+                        navController.navigate("CharacterDetailScreen/${it}") {
+                            launchSingleTop = true
+                        }
+                    })
+            }
         }
     }
 
+
+}
+
+@Composable
+fun Landscape(
+    navController: NavController,
+    date: String,
+    episode: EpisodeTmdb,
+    characterList: List<Character>
+) {
+
+    Row() {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.padding(top = 10.dp), elevation = 8.dp) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w500" + episode.still_path,
+                    contentDescription = "Imagem do episódio",
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            episode.name?.let { it1 ->
+                Text(
+                    text = it1,
+                    Modifier.padding(top = 10.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Text(text = "Temporada: ${episode.seasonNumber}")
+            Text(text = "Episódio: ${episode.episodeNumber}")
+            Text(text = "Lançamento: $date")
+
+            episode.overview?.let { it1 ->
+                Text(
+                    text = it1,
+                    Modifier.padding(top = 10.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Personagens:",
+                Modifier.padding(top = 10.dp),
+                textAlign = TextAlign.Center
+            )
+            LazyVerticalGrid(
+                GridCells.Adaptive(160.dp),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(characterList.size) { index ->
+
+                    CharacterItem(
+                        characterData = (characterList[index]),
+                        onCharacterClicked = {
+                            navController.navigate("CharacterDetailScreen/${it}") {
+                                launchSingleTop = true
+                            }
+                        })
+                }
+            }
+        }
+    }
 }
