@@ -7,35 +7,32 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.components.ErrorUI
 import br.com.ewapps.rickandmorty.components.LoadingUI
+import br.com.ewapps.rickandmorty.components.SearchFeature
 import br.com.ewapps.rickandmorty.models.Character
 import br.com.ewapps.rickandmorty.ui.MainViewModel
 import coil.compose.AsyncImage
-import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 
@@ -48,13 +45,19 @@ fun Characters(
     totalCharacters: Int?,
     viewModel: MainViewModel,
     isLoading: MutableState<Boolean>,
-    isError: MutableState<Boolean>
+    isError: MutableState<Boolean>,
+    query: MutableStateFlow<String>
 ) {
     println(characters?.size)
 
-
-
     var total = totalCharacters ?: 0
+    val searchedText = query.collectAsState().value
+    var characterList = characters
+    if (searchedText != "") {
+        characterList = viewModel.characterSearched.collectAsState().value
+        total = characterList.size
+    }
+
     //Para utilizar scroolToItem, é necessário usar coroutine
     val coroutineScope = rememberCoroutineScope()
 
@@ -79,6 +82,7 @@ fun Characters(
         }
     }
 
+
     //Atualiza a atual posição da tela na viewmodel
     if (listState.isScrollInProgress) {
         if (currentOrientation == 2) {
@@ -98,27 +102,33 @@ fun Characters(
             ErrorUI()
         }
         else -> {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
 
-                LazyVerticalGrid(
-
-                    GridCells.Adaptive(160.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    state = listState
+            Scaffold(topBar = {
+                CharacterTopAppBar(viewModel)
+            }) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (characters != null) {
-                        items(characters.size) { index ->
-                            CharacterItem(
-                                characterData = (characters[index]),
-                                onCharacterClicked = { id ->
-                                    navController.navigate("CharacterDetailScreen/${id}") {
-                                        launchSingleTop = true
-                                    }
-                                })
+                    SearchFeature(query = query, viewModel = viewModel)
+                    Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
+
+                    LazyVerticalGrid(
+
+                        GridCells.Adaptive(160.dp),
+                        contentPadding = PaddingValues(8.dp),
+                        state = listState
+                    ) {
+                        if (characterList != null) {
+                            items(characterList.size) { index ->
+                                CharacterItem(
+                                    characterData = (characterList[index]),
+                                    onCharacterClicked = { id ->
+                                        navController.navigate("CharacterDetailScreen/${id}") {
+                                            launchSingleTop = true
+                                        }
+                                    })
+                            }
                         }
                     }
                 }
@@ -139,7 +149,8 @@ fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Uni
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            AsyncImage(model = characterData.image,
+            AsyncImage(
+                model = characterData.image,
                 contentDescription = "imagem do personagem",
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(
@@ -147,9 +158,16 @@ fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Uni
                 ),
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(100.dp, 100.dp))
+                    .size(100.dp, 100.dp)
+            )
 
-            characterData.name?.let { Text(fontSize = 16.sp, textAlign = TextAlign.Center, text = it) }
+            characterData.name?.let {
+                Text(
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    text = it
+                )
+            }
         }
 
     }
@@ -163,3 +181,13 @@ fun CharactersPreview() {
         CharacterModel(listOf("1", "2", "3"), "Masculino", 1,R.drawable.im1, Location("terra"),"Rick Sanchez", Origin("Terra"), "Humano", "Vivo")
     )
 }*/
+
+@Composable
+fun CharacterTopAppBar(viewModel: MainViewModel) {
+    TopAppBar(
+        title = { Text(text = "Personagens", fontWeight = FontWeight.SemiBold) },
+        actions = { IconButton(onClick = { viewModel.showSearchBarInCharacters() }) {
+            Icon(imageVector = Icons.Default.Search, contentDescription = "Botão procurar")
+        } }
+    )
+}

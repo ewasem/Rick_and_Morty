@@ -322,4 +322,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
         return formatter.format(parser.parse(date))
     }
+
+    val query = MutableStateFlow(String())
+
+
+    private val _characterSearched = MutableStateFlow(mutableListOf(Character()))
+    val characterSearched: StateFlow<MutableList<Character>>
+    get() = _characterSearched
+    fun getSearchedCharacters(value: String) {
+       val charList = _characterList.value.result!!.filter { it.name!!.contains(value, ignoreCase = true) }
+        _characterSearched.value = charList as MutableList<Character>
+        _showSearchBar.value = false
+        println("Resultado dos personagens procurados: ${charList.size}")
+    }
+
+    private val _showSearchBar = MutableStateFlow<Boolean>(false)
+    val showSearchBar: StateFlow<Boolean>
+    get() = _showSearchBar
+
+    fun showSearchBarInCharacters() {
+        _showSearchBar.value = !_showSearchBar.value
+
+    }
 }

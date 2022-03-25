@@ -6,15 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.composable
 import br.com.ewapps.rickandmorty.components.BottomMenu
 import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -28,8 +30,18 @@ fun MainScreen(
     navController: NavHostController,
     viewModel: MainViewModel
 ) {
+    val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    when (navBackStackEntry?.destination?.route) {
+        BottomMenuScreen.Characters.route -> bottomBarState.value = true
+        BottomMenuScreen.Episodes.route -> bottomBarState.value = true
+        BottomMenuScreen.Locations.route -> bottomBarState.value = true
+        else -> bottomBarState.value = false
+    }
+
     Scaffold(bottomBar = {
-        BottomMenu(navController = navController)
+        BottomMenu(navController = navController, bottomBarState = bottomBarState)
     }) { padding ->
         Column(
             modifier = Modifier.padding(padding)
@@ -63,6 +75,12 @@ fun Navigation(
         val totalCharacters1 = mutableStateOf(totalCharacters)
         val characters = mutableStateOf(characterResponse)
         val allEpisodeList = mutableStateOf(allEpisodes)
+        val query = viewModel.query
+
+        if (query.value.isEmpty()) {
+            viewModel.query.value = ""
+        }
+
         bottomNavigation(
             navController = navController,
             characters.value.result,
@@ -70,7 +88,8 @@ fun Navigation(
             viewModel,
             isLoading = isLoading,
             isError = isError,
-            episodeList = allEpisodeList.value
+            episodeList = allEpisodeList.value,
+            query = query
         )
 
 
@@ -172,7 +191,8 @@ fun NavGraphBuilder.bottomNavigation(
     viewModel: MainViewModel,
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>,
-    episodeList: List<SeasonTmdb>?
+    episodeList: List<SeasonTmdb>?,
+    query: MutableStateFlow<String>
 ) {
     composable(BottomMenuScreen.Characters.route,
         enterTransition = {
@@ -209,7 +229,8 @@ fun NavGraphBuilder.bottomNavigation(
             totalCharacters,
             viewModel,
             isLoading,
-            isError
+            isError,
+            query
         )
 
     }
