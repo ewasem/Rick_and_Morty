@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ewapps.rickandmorty.ui.MainViewModel
 import br.com.ewapps.rickandmorty.ui.theme.Color1
+import br.com.ewapps.rickandmorty.ui.theme.Color2
 import br.com.ewapps.rickandmorty.ui.theme.ColorBackground
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -56,7 +57,7 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                         query.value = it
                     }, modifier = Modifier.fillMaxWidth(),
                         label = {
-                            Text(text = "Procurar", color = Color.White)
+                            Text(text = "Procurar", color = Color2)
                         },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -66,7 +67,7 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = "",
-                                tint = Color.White
+                                tint = Color2
                             )
                         },
                         trailingIcon = {
@@ -75,12 +76,12 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "",
-                                        tint = Color.White
+                                        tint = Color2
                                     )
                                 }
                             }
                         },
-                        textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                        textStyle = TextStyle(color = Color2, fontSize = 18.sp),
                         keyboardActions = KeyboardActions(
                             onSearch = {
                                 if (query.value != "") {
@@ -89,7 +90,7 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                                 localFocusManager.clearFocus()
                             }
                         ),
-                        colors = TextFieldDefaults.textFieldColors(textColor = Color.White)
+                        colors = TextFieldDefaults.textFieldColors(textColor = Color2)
                     )
                 }
 

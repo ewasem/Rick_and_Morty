@@ -103,32 +103,28 @@ fun Characters(
         }
         else -> {
 
-            Scaffold(topBar = {
-                CharacterTopAppBar(viewModel)
-            }) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SearchFeature(query = query, viewModel = viewModel)
+                Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
+
+                LazyVerticalGrid(
+
+                    GridCells.Adaptive(160.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    state = listState
                 ) {
-                    SearchFeature(query = query, viewModel = viewModel)
-                    Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
-
-                    LazyVerticalGrid(
-
-                        GridCells.Adaptive(160.dp),
-                        contentPadding = PaddingValues(8.dp),
-                        state = listState
-                    ) {
-                        if (characterList != null) {
-                            items(characterList.size) { index ->
-                                CharacterItem(
-                                    characterData = (characterList[index]),
-                                    onCharacterClicked = { id ->
-                                        navController.navigate("CharacterDetailScreen/${id}") {
-                                            launchSingleTop = true
-                                        }
-                                    })
-                            }
+                    if (characterList != null) {
+                        items(characterList.size) { index ->
+                            CharacterItem(
+                                characterData = (characterList[index]),
+                                onCharacterClicked = { id ->
+                                    navController.navigate("CharacterDetailScreen/${id}") {
+                                        launchSingleTop = true
+                                    }
+                                })
                         }
                     }
                 }
@@ -136,6 +132,7 @@ fun Characters(
         }
     }
 }
+
 
 @Composable
 fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Unit = {}) {
@@ -182,12 +179,4 @@ fun CharactersPreview() {
     )
 }*/
 
-@Composable
-fun CharacterTopAppBar(viewModel: MainViewModel) {
-    TopAppBar(
-        title = { Text(text = "Personagens", fontWeight = FontWeight.SemiBold) },
-        actions = { IconButton(onClick = { viewModel.showSearchBarInCharacters() }) {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Botão procurar")
-        } }
-    )
-}
+

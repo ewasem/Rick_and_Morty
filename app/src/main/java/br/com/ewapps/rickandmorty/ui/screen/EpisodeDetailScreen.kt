@@ -6,8 +6,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,43 +33,26 @@ fun EpisodeDetailScreen(
     val date = episode.air_date?.let { viewModel.dateFormatter(it) }
     val currentOrientation = LocalConfiguration.current.orientation
 
-    Scaffold(topBar = { EpisodeDetailTopAppBar(onBackPressed = { navController.popBackStack() }) }) {
 
-        if (date != null) {
-            if (currentOrientation == 1) {
-                Portrait(
-                    navController = navController,
-                    date = date,
-                    episode = episode,
-                    characterList = characterList
-                )
-            } else {
-                Landscape(
-                    navController = navController,
-                    date = date,
-                    episode = episode,
-                    characterList = characterList
-                )
-            }
+    if (date != null) {
+        if (currentOrientation == 1) {
+            Portrait(
+                navController = navController,
+                date = date,
+                episode = episode,
+                characterList = characterList
+            )
+        } else {
+            Landscape(
+                navController = navController,
+                date = date,
+                episode = episode,
+                characterList = characterList
+            )
         }
     }
 }
 
-@Composable
-fun EpisodeDetailTopAppBar(onBackPressed: () -> Unit = {}) {
-    TopAppBar(
-        title = { Text(text = "Detalhe do Episódio", fontWeight = FontWeight.SemiBold) },
-        navigationIcon = {
-            IconButton(
-                onClick = { onBackPressed() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Botão voltar"
-                )
-            }
-        }, elevation = 5.dp
-    )
-}
 
 @Composable
 fun Portrait(
@@ -142,7 +123,11 @@ fun EpisodeCharacters(navController: NavController, characterList: List<Characte
 
 @Composable
 fun EpisodeDetails(episode: EpisodeTmdb, date: String) {
-    Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.padding(top = 10.dp), elevation = 8.dp) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.padding(top = 10.dp),
+        elevation = 8.dp
+    ) {
         AsyncImage(
             model = "https://image.tmdb.org/t/p/w500" + episode.still_path,
             contentDescription = "Imagem do episódio",

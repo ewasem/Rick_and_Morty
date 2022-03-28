@@ -26,6 +26,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val splash: StateFlow<Boolean>
         get() = _splash
 
+    private val _topBarTitle = MutableStateFlow("")
+    val topBarTitle: StateFlow<String>
+        get() = _topBarTitle
+
+    fun changeTopBarTiltle(text: String) {
+        _topBarTitle.value = text
+    }
+
     //Variável que recebe a lista de personagens
     private var _characterResponse = CharacterResponse()
 
@@ -328,9 +336,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _characterSearched = MutableStateFlow(mutableListOf(Character()))
     val characterSearched: StateFlow<MutableList<Character>>
-    get() = _characterSearched
+        get() = _characterSearched
+
     fun getSearchedCharacters(value: String) {
-       val charList = _characterList.value.result!!.filter { it.name!!.contains(value, ignoreCase = true) }
+        val charList =
+            _characterList.value.result!!.filter { it.name!!.contains(value, ignoreCase = true) }
         _characterSearched.value = charList as MutableList<Character>
         _showSearchBar.value = false
         println("Resultado dos personagens procurados: ${charList.size}")
@@ -338,7 +348,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _showSearchBar = MutableStateFlow<Boolean>(false)
     val showSearchBar: StateFlow<Boolean>
-    get() = _showSearchBar
+        get() = _showSearchBar
 
     fun showSearchBarInCharacters() {
         _showSearchBar.value = !_showSearchBar.value

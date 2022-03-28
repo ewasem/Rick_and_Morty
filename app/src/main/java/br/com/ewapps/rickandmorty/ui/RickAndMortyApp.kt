@@ -1,5 +1,6 @@
 package br.com.ewapps.rickandmorty.ui
 
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.composable
 import br.com.ewapps.rickandmorty.components.BottomMenu
+import br.com.ewapps.rickandmorty.components.TopBar
 import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -31,18 +33,59 @@ fun MainScreen(
     viewModel: MainViewModel
 ) {
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
+    val topBarState = rememberSaveable { (mutableStateOf(true)) }
+    var text = ""
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     when (navBackStackEntry?.destination?.route) {
-        BottomMenuScreen.Characters.route -> bottomBarState.value = true
-        BottomMenuScreen.Episodes.route -> bottomBarState.value = true
-        BottomMenuScreen.Locations.route -> bottomBarState.value = true
-        else -> bottomBarState.value = false
+        BottomMenuScreen.Characters.route -> {
+            topBarState.value = true
+            bottomBarState.value = true
+            viewModel.changeTopBarTiltle("Personagens")
+        }
+        BottomMenuScreen.Episodes.route -> {
+            topBarState.value = true
+            bottomBarState.value = true
+            viewModel.changeTopBarTiltle("Episódios")
+        }
+        BottomMenuScreen.Locations.route -> {
+            topBarState.value = true
+            bottomBarState.value = true
+            viewModel.changeTopBarTiltle("Lugares")
+        }
+        "CharacterDetailScreen/{id}" -> {
+            topBarState.value = true
+            bottomBarState.value = false
+            viewModel.changeTopBarTiltle("Detalhes do Personagem")
+        }
+        "EpisodeDetailScreen/{id}" -> {
+            topBarState.value = true
+            bottomBarState.value = false
+            viewModel.changeTopBarTiltle("Detalhes do Episódio")
+        }
+
+        else -> {
+            bottomBarState.value = false
+            topBarState.value = false
+            viewModel.changeTopBarTiltle("")
+        }
+
     }
 
-    Scaffold(bottomBar = {
-        BottomMenu(navController = navController, bottomBarState = bottomBarState)
-    }) { padding ->
+    Scaffold(
+        bottomBar = {
+            BottomMenu(navController = navController, bottomBarState = bottomBarState)
+        },
+        topBar = {
+            TopBar(
+                viewModel = viewModel,
+                text = text,
+                navController = navController,
+                topBarState = topBarState,
+                onBackPressed = { navController.popBackStack() }
+            )
+        }) { padding ->
         Column(
             modifier = Modifier.padding(padding)
         ) {

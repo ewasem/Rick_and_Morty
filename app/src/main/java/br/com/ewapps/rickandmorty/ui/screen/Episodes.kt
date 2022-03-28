@@ -18,30 +18,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import br.com.ewapps.rickandmorty.components.TopBar
 import br.com.ewapps.rickandmorty.models.SeasonTmdb
+import br.com.ewapps.rickandmorty.ui.MainViewModel
 import br.com.ewapps.rickandmorty.ui.theme.Color4
 import br.com.ewapps.rickandmorty.ui.theme.ColorBackground
 import coil.compose.AsyncImage
 
 @Composable
-fun Episodes(navController: NavController, episodeList: List<SeasonTmdb>?) {
-    Scaffold(topBar = {
-        EpisodeTopAppBar(onBackPressed = { navController.popBackStack() })
-    }) {
+fun Episodes(
+    navController: NavController,
+    episodeList: List<SeasonTmdb>?
+) {
 
-        LazyColumn() {
-            if (episodeList != null) {
-                items(episodeList.size) { index ->
-                    SeasonItem(
-                        item = episodeList[index],
-                        onEpisodeClicked = { id: Int-> navController.navigate("EpisodeDetailScreen/${id}") {
+    LazyColumn() {
+        if (episodeList != null) {
+            items(episodeList.size) { index ->
+                SeasonItem(
+                    item = episodeList[index],
+                    onEpisodeClicked = { id: Int ->
+                        navController.navigate("EpisodeDetailScreen/${id}") {
                             launchSingleTop = true
-                        } })
-                }
+                        }
+                    })
             }
         }
     }
 }
+
 
 @Composable
 fun SeasonItem(item: SeasonTmdb, onEpisodeClicked: (id: Int) -> Unit = { _ -> }) {
@@ -54,12 +58,33 @@ fun SeasonItem(item: SeasonTmdb, onEpisodeClicked: (id: Int) -> Unit = { _ -> })
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
 
-            Text(text = "Temporada ${item.seasonNumber}", Modifier.padding(bottom = 8.dp), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-            Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.size(width = 250.dp, height = 350.dp)) {
-                AsyncImage(model = poster, contentDescription = "Poster Temporada", Modifier.fillMaxWidth(), contentScale = ContentScale.Crop)
+            Text(
+                text = "Temporada ${item.seasonNumber}",
+                Modifier.padding(bottom = 8.dp),
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Card(
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.size(width = 250.dp, height = 350.dp)
+            ) {
+                AsyncImage(
+                    model = poster,
+                    contentDescription = "Poster Temporada",
+                    Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Crop
+                )
             }
             println("Imagem poster: ${item.posterPath}")
-            item.overview?.let { Text(text = it, Modifier.padding(8.dp), color = Color.White, textAlign = TextAlign.Center) }
+            item.overview?.let {
+                Text(
+                    text = it,
+                    Modifier.padding(8.dp),
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 for (i in item.episodes?.indices!!) {
@@ -94,20 +119,6 @@ fun SeasonItem(item: SeasonTmdb, onEpisodeClicked: (id: Int) -> Unit = { _ -> })
 
             }
         }
-
     }
 }
 
-
-@Composable
-fun EpisodeTopAppBar(onBackPressed: () -> Unit = {}) {
-    TopAppBar(
-        title = { Text(text = "Lista de Episódios", fontWeight = FontWeight.SemiBold) },
-        navigationIcon = {
-            IconButton(
-                onClick = { onBackPressed() }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Botão voltar")
-            }
-        }, elevation = 8.dp
-    )
-}

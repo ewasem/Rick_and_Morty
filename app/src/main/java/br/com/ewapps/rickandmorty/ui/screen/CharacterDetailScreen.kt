@@ -47,41 +47,26 @@ fun CharacterDetailScreen(
     val seasonEpisodes = viewModel.characterEpisodes.collectAsState().value
     val currentOrientation = LocalConfiguration.current.orientation
 
-    Scaffold(topBar = {
-        DetailTopAppBar(onBackPressed = { navController.popBackStack() })
-    }) {
-        Box {
-            if (currentOrientation == 1) {
-                Portrait(
-                    navController = navController,
-                    characterData = characterData,
-                    seasonEpisodes = seasonEpisodes
-                )
-            } else {
-                Landscape(
-                    navController = navController,
-                    characterData = characterData,
-                    seasonEpisodes = seasonEpisodes
-                )
-            }
 
+    Box {
+        if (currentOrientation == 1) {
+            Portrait(
+                navController = navController,
+                characterData = characterData,
+                seasonEpisodes = seasonEpisodes
+            )
+        } else {
+            Landscape(
+                navController = navController,
+                characterData = characterData,
+                seasonEpisodes = seasonEpisodes
+            )
         }
+
     }
 }
 
 
-@Composable
-fun DetailTopAppBar(onBackPressed: () -> Unit = {}) {
-    TopAppBar(
-        title = { Text(text = "Detalhe do Personagem", fontWeight = FontWeight.SemiBold) },
-        navigationIcon = {
-            IconButton(
-                onClick = { onBackPressed() }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Botão voltar")
-            }
-        }, elevation = 5.dp
-    )
-}
 
 /*
 @Preview(showBackground = true)
@@ -201,9 +186,11 @@ private fun Portrait(
                                         Text(
                                             text = "Episódio: ${it.episodeNumber} - ${it.name}",
                                             Modifier
-                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
-                                                    launchSingleTop = true
-                                                } }
+                                                .clickable {
+                                                    navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
+                                                        launchSingleTop = true
+                                                    }
+                                                }
                                                 .layoutId("episodeText"),
                                             textAlign = TextAlign.Center)
                                     }
@@ -327,9 +314,11 @@ private fun Landscape(
                                         Text(
                                             text = "Episódio: ${it.episodeNumber} - ${it.name}",
                                             Modifier
-                                                .clickable { navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
-                                                    launchSingleTop = true
-                                                } }
+                                                .clickable {
+                                                    navController.navigate("EpisodeDetailScreen/${it.episodeId}") {
+                                                        launchSingleTop = true
+                                                    }
+                                                }
                                                 .layoutId("episodeText"),
                                             textAlign = TextAlign.Center)
                                     }
