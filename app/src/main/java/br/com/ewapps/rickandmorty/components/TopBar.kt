@@ -24,7 +24,6 @@ import br.com.ewapps.rickandmorty.ui.screen.BottomMenuScreen
 @Composable
 fun TopBar(
     viewModel: MainViewModel,
-    text: String,
     navController: NavController,
     onBackPressed: () -> Unit = {},
     topBarState: MutableState<Boolean>

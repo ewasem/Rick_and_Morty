@@ -4,6 +4,7 @@ package br.com.ewapps.rickandmorty.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
@@ -80,16 +81,15 @@ fun MainScreen(
         topBar = {
             TopBar(
                 viewModel = viewModel,
-                text = text,
                 navController = navController,
                 topBarState = topBarState,
                 onBackPressed = { navController.popBackStack() }
             )
         }) { padding ->
         Column(
-            modifier = Modifier.padding(padding)
+            //modifier = Modifier.padding(padding)
         ) {
-            Navigation(navController = navController, viewModel = viewModel)
+            Navigation(navController = navController, viewModel = viewModel, padding= padding)
         }
     }
 }
@@ -98,7 +98,8 @@ fun MainScreen(
 @Composable
 fun Navigation(
     navController: NavHostController,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    padding: PaddingValues
 ) {
     val loading by viewModel.isLoading.collectAsState()
     val splash by viewModel.splash.collectAsState()
@@ -132,7 +133,8 @@ fun Navigation(
             isLoading = isLoading,
             isError = isError,
             episodeList = allEpisodeList.value,
-            query = query
+            query = query,
+            padding = padding
         )
 
 
@@ -235,7 +237,8 @@ fun NavGraphBuilder.bottomNavigation(
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>,
     episodeList: List<SeasonTmdb>?,
-    query: MutableStateFlow<String>
+    query: MutableStateFlow<String>,
+    padding: PaddingValues
 ) {
     composable(BottomMenuScreen.Characters.route,
         enterTransition = {
@@ -266,15 +269,18 @@ fun NavGraphBuilder.bottomNavigation(
                 animationSpec = tween(700)
             ) + fadeOut()
         }) {
-        Characters(
-            navController = navController,
-            characters = characters,
-            totalCharacters,
-            viewModel,
-            isLoading,
-            isError,
-            query
-        )
+        Column(modifier = Modifier.padding(padding)) {
+            Characters(
+                navController = navController,
+                characters = characters,
+                totalCharacters,
+                viewModel,
+                isLoading,
+                isError,
+                query
+            )
+        }
+
 
     }
     composable(BottomMenuScreen.Episodes.route,
@@ -306,7 +312,10 @@ fun NavGraphBuilder.bottomNavigation(
                 animationSpec = tween(700)
             ) + fadeOut()
         }) {
-        Episodes(navController = navController, episodeList = episodeList)
+        Column(modifier = Modifier.padding(padding)) {
+            Episodes(navController = navController, episodeList = episodeList)
+        }
+
     }
     composable(BottomMenuScreen.Locations.route,
         enterTransition = {
@@ -337,7 +346,10 @@ fun NavGraphBuilder.bottomNavigation(
                 animationSpec = tween(700)
             ) + fadeOut()
         }) {
-        Locations(navController = navController)
+        Column(modifier = Modifier.padding(padding)) {
+            Locations(navController = navController)
+        }
+
     }
 }
 

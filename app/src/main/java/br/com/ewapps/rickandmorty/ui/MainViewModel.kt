@@ -26,6 +26,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val splash: StateFlow<Boolean>
         get() = _splash
 
+    //Variável que guarda o título do TopBar
     private val _topBarTitle = MutableStateFlow("")
     val topBarTitle: StateFlow<String>
         get() = _topBarTitle
