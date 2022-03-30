@@ -250,39 +250,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //Armazena a posição na linha
     private val _visibleItemOffset = MutableStateFlow(0)
 
-    //Armazena a orientação atual da tela
-    private val _orientation = MutableStateFlow(0)
-    val orientation: StateFlow<Int>
-        get() = _orientation
-
-    //Atualiza a orientação em caso de mudança
-    fun updateOrientation(orientation: Int) {
-        _orientation.value = orientation
-    }
-
-    //Atualiza a posição
-    fun updateOffset(offset: Int) {
-        _visibleItemOffset.update { offset }
-    }
-
-    //retorna o valor da posição para o compose
-    fun getOffset(): Int {
-        return _visibleItemOffset.value
-    }
-
-    //apualiza a linha
-    fun updateIndex(index: Int) {
-        _visibleItemIndex.update { index }
-    }
-
-    //retorna a linha atual para o compose
-    fun getIndex(orientation: Int): Int {
-        if (orientation == 2) {
-            return _visibleItemIndex.value / 2
-        }
-        return _visibleItemIndex.value
-    }
-
     //armazena todos os personagens para depois atualizar a lista de personagens que irá aparecer na tela
     private var charList = mutableListOf<Character>()
 
@@ -332,25 +299,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return formatter.format(parser.parse(date))
     }
 
+    //armazena o nome procurado
     val query = MutableStateFlow(String())
 
-
+    //Armazena a lista de personagens que foram filtradas pelo nome procurado
     private val _characterSearched = MutableStateFlow(mutableListOf(Character()))
     val characterSearched: StateFlow<MutableList<Character>>
         get() = _characterSearched
 
+    //Filtra os personagens pelo nome
     fun getSearchedCharacters(value: String) {
         val charList =
             _characterList.value.result!!.filter { it.name!!.contains(value, ignoreCase = true) }
         _characterSearched.value = charList as MutableList<Character>
-        _showSearchBar.value = false
         println("Resultado dos personagens procurados: ${charList.size}")
     }
 
+    //Armazena o estaso da barra de procura.
     private val _showSearchBar = MutableStateFlow<Boolean>(false)
     val showSearchBar: StateFlow<Boolean>
         get() = _showSearchBar
 
+    //muda o estado da barra de procura
     fun showSearchBarInCharacters() {
         _showSearchBar.value = !_showSearchBar.value
 

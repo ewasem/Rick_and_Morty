@@ -1,12 +1,15 @@
 package br.com.ewapps.rickandmorty.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,8 +40,17 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
 
     AnimatedVisibility(
         visible = viewModel.showSearchBar.collectAsState().value,
-        enter = slideInVertically(initialOffsetY = { -it }),
-        exit = slideOutVertically(targetOffsetY = { -it }),
+        enter = slideInVertically(
+            initialOffsetY = { -it }, animationSpec = tween(
+                durationMillis = 500
+            )
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { -it },
+            animationSpec = tween(
+                durationMillis = 500
+            )
+        ),
         content = {
             Box(
                 Modifier
@@ -55,6 +67,9 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                 ) {
                     TextField(value = query.collectAsState().value, onValueChange = {
                         query.value = it
+                        if (query.value != "") {
+                            viewModel.getSearchedCharacters(query.value)
+                        }
                     }, modifier = Modifier.fillMaxWidth(),
                         label = {
                             Text(text = "Procurar", color = Color2)
@@ -84,9 +99,10 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                         textStyle = TextStyle(color = Color2, fontSize = 18.sp),
                         keyboardActions = KeyboardActions(
                             onSearch = {
-                                if (query.value != "") {
-                                    viewModel.getSearchedCharacters(query.value)
-                                }
+                                /*if (query.value != "") {
+                            viewModel.getSearchedCharacters(query.value)
+                        }*/
+                                viewModel.showSearchBarInCharacters()
                                 localFocusManager.clearFocus()
                             }
                         ),

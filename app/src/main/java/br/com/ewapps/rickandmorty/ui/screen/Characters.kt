@@ -1,17 +1,19 @@
 package br.com.ewapps.rickandmorty.ui.screen
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +23,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.ewapps.rickandmorty.R
 import br.com.ewapps.rickandmorty.components.ErrorUI
@@ -57,42 +59,17 @@ fun Characters(
         characterList = viewModel.characterSearched.collectAsState().value
         total = characterList.size
     }
-
-    //Para utilizar scroolToItem, é necessário usar coroutine
-    val coroutineScope = rememberCoroutineScope()
-
     //Inicializa a posição que a tela está
     val listState = rememberLazyGridState()
 
-    //Pega a posição atual da tela, retorna 1 para Portrait ou 2 para Landscape
-    val currentOrientation = LocalConfiguration.current.orientation
-
-    //Pega a atual posição da primeira linha a ser exibida na tela
-    val index = viewModel.getIndex(currentOrientation)
-
-    //Pega o valor do offset, pois se está no meio de uma linha, ao mudar a tela, aparecerá na mesma posição
-    val offset = viewModel.getOffset()
-
-    //Se houve mudança de posição na tela, lança a funça para ir até a posição correta
-    //E atualiza a orientação da tela na viewModel
-    if (currentOrientation != viewModel.orientation.collectAsState().value) {
-        coroutineScope.launch {
-            listState.scrollToItem(index = index, offset)
-            viewModel.updateOrientation(currentOrientation)
-        }
-    }
-
-
-    //Atualiza a atual posição da tela na viewmodel
-    if (listState.isScrollInProgress) {
-        if (currentOrientation == 2) {
-            viewModel.updateIndex(listState.firstVisibleItemIndex * 2)
-            viewModel.updateOffset(listState.firstVisibleItemScrollOffset)
-        } else {
-            viewModel.updateIndex(listState.firstVisibleItemIndex)
-            viewModel.updateOffset(listState.firstVisibleItemScrollOffset)
-        }
-    }
+    //Animação para empurrar a tela de personangens para baixo quando a
+    //searchBar é acionada.
+    val offsetAnimation: Dp by animateDpAsState(
+        if (viewModel.showSearchBar.collectAsState().value) 70.dp else 0.dp,
+        tween(
+            durationMillis = 500
+        )
+    )
 
     when {
         isLoading.value -> {
@@ -104,10 +81,12 @@ fun Characters(
         else -> {
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 8.dp)
+                    .absoluteOffset(y = offsetAnimation),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SearchFeature(query = query, viewModel = viewModel)
                 Text(text = "Total de personagens: $total", fontWeight = FontWeight.SemiBold)
 
                 LazyVerticalGrid(
@@ -132,6 +111,7 @@ fun Characters(
         }
     }
 }
+
 
 
 @Composable
@@ -178,5 +158,4 @@ fun CharactersPreview() {
         CharacterModel(listOf("1", "2", "3"), "Masculino", 1,R.drawable.im1, Location("terra"),"Rick Sanchez", Origin("Terra"), "Humano", "Vivo")
     )
 }*/
-
 

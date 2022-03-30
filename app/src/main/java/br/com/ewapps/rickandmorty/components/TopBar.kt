@@ -3,17 +3,13 @@ package br.com.ewapps.rickandmorty.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -39,6 +35,7 @@ fun TopBar(
         exit = slideOutVertically(targetOffsetY = { it }),
     ) {
         if (currentRoute == BottomMenuScreen.Characters.route) {
+            var menu by remember { mutableStateOf(false) }
             TopAppBar(
                 title = { Text(text = title, fontWeight = FontWeight.SemiBold) },
                 actions = {
@@ -47,6 +44,17 @@ fun TopBar(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Botão procurar"
                         )
+                    }
+                    IconButton(onClick = { menu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filtrar"
+                        )
+                    }
+                    MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(16.dp))) {
+                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+
+                        }
                     }
                 }, elevation = 0.dp
             )

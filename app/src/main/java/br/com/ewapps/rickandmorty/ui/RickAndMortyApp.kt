@@ -10,10 +10,12 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.composable
 import br.com.ewapps.rickandmorty.components.BottomMenu
+import br.com.ewapps.rickandmorty.components.SearchFeature
 import br.com.ewapps.rickandmorty.components.TopBar
 import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
@@ -35,7 +37,6 @@ fun MainScreen(
 ) {
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
-    var text = ""
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -89,6 +90,7 @@ fun MainScreen(
         Column(
             //modifier = Modifier.padding(padding)
         ) {
+
             Navigation(navController = navController, viewModel = viewModel, padding= padding)
         }
     }
@@ -173,8 +175,9 @@ fun Navigation(
 
             val id = it.arguments?.getInt("id")
             viewModel.selectedCharacter(id!!)
+            Column(modifier = Modifier.padding(padding)) {
             CharacterDetailScreen(navController, viewModel)
-        }
+        }}
 
         composable(
             "EpisodeDetailScreen/{id}",
@@ -213,13 +216,14 @@ fun Navigation(
             val id = it.arguments?.getInt("id")
             viewModel.selectedEpisode(id!!)
 
+            Column(modifier = Modifier.padding(padding)) {
             EpisodeDetailScreen(
                 viewModel = viewModel,
                 navController = navController,
                 episode = episodeSelectedData,
                 characterList = episodeCharacters
             )
-        }
+        }}
 
         composable("SplashScreen") {
 
@@ -269,6 +273,7 @@ fun NavGraphBuilder.bottomNavigation(
                 animationSpec = tween(700)
             ) + fadeOut()
         }) {
+        SearchFeature(query = query, viewModel = viewModel)
         Column(modifier = Modifier.padding(padding)) {
             Characters(
                 navController = navController,
@@ -280,8 +285,6 @@ fun NavGraphBuilder.bottomNavigation(
                 query
             )
         }
-
-
     }
     composable(BottomMenuScreen.Episodes.route,
         enterTransition = {
