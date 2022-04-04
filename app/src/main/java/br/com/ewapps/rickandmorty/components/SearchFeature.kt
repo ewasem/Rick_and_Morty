@@ -1,7 +1,6 @@
 package br.com.ewapps.rickandmorty.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -9,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,9 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -31,10 +29,9 @@ import br.com.ewapps.rickandmorty.ui.MainViewModel
 import br.com.ewapps.rickandmorty.ui.theme.Color1
 import br.com.ewapps.rickandmorty.ui.theme.Color2
 import br.com.ewapps.rickandmorty.ui.theme.ColorBackground
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
+fun SearchFeature(query: MutableState<String>, viewModel: MainViewModel) {
 
     val localFocusManager = LocalFocusManager.current
 
@@ -65,11 +62,11 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                         .padding(8.dp),
                     backgroundColor = ColorBackground
                 ) {
-                    TextField(value = query.collectAsState().value, onValueChange = {
+                    TextField(value = query.value, onValueChange = {
                         query.value = it
-                        if (query.value != "") {
-                            viewModel.getSearchedCharacters(query.value)
-                        }
+                        viewModel.query.value = it
+                        viewModel.getFilteredCharacters()
+
                     }, modifier = Modifier.fillMaxWidth(),
                         label = {
                             Text(text = "Procurar", color = Color2)
@@ -86,8 +83,10 @@ fun SearchFeature(query: MutableStateFlow<String>, viewModel: MainViewModel) {
                             )
                         },
                         trailingIcon = {
-                            if (query.collectAsState().value != "") {
-                                IconButton(onClick = { query.value = "" }) {
+                            if (query.value != "") {
+                                IconButton(onClick = { query.value = ""
+                                viewModel.query.value = ""
+                                viewModel.getFilteredCharacters()}) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "",

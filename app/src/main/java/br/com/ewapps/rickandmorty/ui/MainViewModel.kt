@@ -2,7 +2,9 @@ package br.com.ewapps.rickandmorty.ui
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.animation.core.snap
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ewapps.rickandmorty.MainApp
@@ -54,6 +56,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean>
         get() = _isError
+
+    private val _firstTime = MutableStateFlow(true)
+    val firsTime: StateFlow<Boolean>
+        get() = _firstTime
 
     //variável que em caso de erro, atualiza a variável de controle _isError para verdadeiro
     private val errorHandler = CoroutineExceptionHandler { _, error ->
@@ -177,7 +183,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     //deixando várias telas character, por exemplo.
     private fun delayForSplash() {
         viewModelScope.launch {
-            delay(3000L)
+            delay(4000L)
             _splash.value = false
         }
     }
@@ -240,8 +246,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //Armazena a Lista com todos os personagens
     private val _characterList = MutableStateFlow(CharacterResponse())
-    val characetrList: StateFlow<CharacterResponse>
-        get() = _characterList
+    val characetrList = snapshotFlow { _characterList }
 
 
     //Armazena o index da peimeira linha que aparece na tela
@@ -263,11 +268,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _characterResponse = repository.getCharacters(i)
                     _characterResponse.result?.let { charList.addAll(it) }
                     _characterList.update { CharacterResponse(charList) }
-                    _isLoading.value = false
                     i++
-
                 }
             }
+            _isLoading.value = false
         }
     }
 
@@ -300,20 +304,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //armazena o nome procurado
-    val query = MutableStateFlow(String())
+    val query = MutableStateFlow("")
+
 
     //Armazena a lista de personagens que foram filtradas pelo nome procurado
     private val _characterSearched = MutableStateFlow(mutableListOf(Character()))
-    val characterSearched: StateFlow<MutableList<Character>>
-        get() = _characterSearched
 
     //Filtra os personagens pelo nome
-    fun getSearchedCharacters(value: String) {
-        val charList =
+    /*fun getSearchedCharacters(value: String) {
+        val charList = if (filterType.value != "") {
+            _characterFiltered.value.filter { it.name!!.contains(value, ignoreCase = true) }
+        } else {
             _characterList.value.result!!.filter { it.name!!.contains(value, ignoreCase = true) }
+        }
         _characterSearched.value = charList as MutableList<Character>
-        println("Resultado dos personagens procurados: ${charList.size}")
-    }
+    }*/
 
     //Armazena o estaso da barra de procura.
     private val _showSearchBar = MutableStateFlow<Boolean>(false)
@@ -324,5 +329,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun showSearchBarInCharacters() {
         _showSearchBar.value = !_showSearchBar.value
 
+    }
+
+    private val _characterFiltered = MutableStateFlow(CharacterResponse())
+    val characterFiltered: StateFlow<CharacterResponse>
+        get() = _characterFiltered
+
+
+    val filterString = MutableStateFlow("")
+
+    val filterType = MutableStateFlow("")
+
+    fun getFilteredCharacters() {
+        _firstTime.value = false
+        val charactersFilteredList = mutableListOf<Character>()
+        val charListWithQuery = mutableListOf<Character>()
+            charListWithQuery.addAll(_characterList.value.result!!.filter {
+                it.name!!.contains(
+                    query.value,
+                    ignoreCase = true
+                )
+            })
+        charactersFilteredList.addAll(when (filterType.value) {
+            "Status" -> {
+                charListWithQuery.filter {
+                    it.status!!.contains(
+                        filterString.value,
+                        ignoreCase = true
+                    )
+                } as MutableList<Character>
+            }
+            else -> charListWithQuery
+        })
+        _characterFiltered.update { CharacterResponse(charactersFilteredList) }
     }
 }

@@ -48,17 +48,10 @@ fun Characters(
     viewModel: MainViewModel,
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>,
-    query: MutableStateFlow<String>
+    query: MutableState<String>,
+    firstTime: MutableState<Boolean>
 ) {
-    println(characters?.size)
 
-    var total = totalCharacters ?: 0
-    val searchedText = query.collectAsState().value
-    var characterList = characters
-    if (searchedText != "") {
-        characterList = viewModel.characterSearched.collectAsState().value
-        total = characterList.size
-    }
     //Inicializa a posição que a tela está
     val listState = rememberLazyGridState()
 
@@ -67,9 +60,24 @@ fun Characters(
     val offsetAnimation: Dp by animateDpAsState(
         if (viewModel.showSearchBar.collectAsState().value) 70.dp else 0.dp,
         tween(
-            durationMillis = 500
+            durationMillis = 500)
         )
-    )
+    var total = 0
+    val characterList = mutableListOf<Character>()
+    if (viewModel.firsTime.collectAsState().value) {
+        if (characters != null) {
+            characterList.clear()
+            characterList.addAll(characters)
+            if (totalCharacters != null) {
+                total = totalCharacters
+            }
+        }
+    } else {
+        characterList.clear()
+        val characterList1 by viewModel.characterFiltered.collectAsState()
+        characterList1.result?.let { characterList.addAll(it) }
+        total = characterList.size
+    }
 
     when {
         isLoading.value -> {
@@ -79,7 +87,6 @@ fun Characters(
             ErrorUI()
         }
         else -> {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -95,8 +102,8 @@ fun Characters(
                     contentPadding = PaddingValues(8.dp),
                     state = listState
                 ) {
-                    if (characterList != null) {
-                        items(characterList.size) { index ->
+                    characterList.size.let {
+                        items(it) { index ->
                             CharacterItem(
                                 characterData = (characterList[index]),
                                 onCharacterClicked = { id ->
@@ -111,8 +118,6 @@ fun Characters(
         }
     }
 }
-
-
 
 @Composable
 fun CharacterItem(characterData: Character, onCharacterClicked: (id: Int) -> Unit = {}) {

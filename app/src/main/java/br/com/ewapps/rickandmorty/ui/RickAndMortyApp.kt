@@ -10,7 +10,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.composable
@@ -21,7 +20,6 @@ import br.com.ewapps.rickandmorty.models.*
 import br.com.ewapps.rickandmorty.ui.screen.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -107,36 +105,37 @@ fun Navigation(
     val splash by viewModel.splash.collectAsState()
     val error by viewModel.isError.collectAsState()
     val totalCharacters by viewModel.infoResponse.collectAsState()
-    val characterResponse by viewModel.characetrList.collectAsState()
+    val characterResponse by viewModel.characetrList.collectAsState(null)
     val allEpisodes by viewModel.allEpisodes.collectAsState()
     val episodeSelectedData by viewModel.episodeSelectedData.collectAsState()
     val episodeCharacters by viewModel.episodeCharacters.collectAsState()
+    val firstTime by viewModel.firsTime.collectAsState()
 
     AnimatedNavHost(
         navController = navController,
         startDestination = if (splash) "SplashScreen" else "Characters"
     ) {
+
+        val firstTimeValue = mutableStateOf(firstTime)
         val isLoading = mutableStateOf(loading)
         val isError = mutableStateOf(error)
-        val totalCharacters1 = mutableStateOf(totalCharacters)
         val characters = mutableStateOf(characterResponse)
+        val totalCharacters1 = mutableStateOf(totalCharacters)
         val allEpisodeList = mutableStateOf(allEpisodes)
-        val query = viewModel.query
-
-        if (query.value.isEmpty()) {
-            viewModel.query.value = ""
-        }
+        val query = mutableStateOf(viewModel.query.value)
+        val filter = mutableStateOf(viewModel.filterType.value)
 
         bottomNavigation(
             navController = navController,
-            characters.value.result,
+            characters.value?.value?.result,
             totalCharacters1.value.info?.count,
             viewModel,
             isLoading = isLoading,
             isError = isError,
             episodeList = allEpisodeList.value,
             query = query,
-            padding = padding
+            padding = padding,
+            firstTime = firstTimeValue
         )
 
 
@@ -172,7 +171,6 @@ fun Navigation(
                 ) + fadeOut()
             }
         ) {
-
             val id = it.arguments?.getInt("id")
             viewModel.selectedCharacter(id!!)
             Column(modifier = Modifier.padding(padding)) {
@@ -241,8 +239,9 @@ fun NavGraphBuilder.bottomNavigation(
     isLoading: MutableState<Boolean>,
     isError: MutableState<Boolean>,
     episodeList: List<SeasonTmdb>?,
-    query: MutableStateFlow<String>,
-    padding: PaddingValues
+    query: MutableState<String>,
+    padding: PaddingValues,
+    firstTime: MutableState<Boolean>
 ) {
     composable(BottomMenuScreen.Characters.route,
         enterTransition = {
@@ -282,7 +281,8 @@ fun NavGraphBuilder.bottomNavigation(
                 viewModel,
                 isLoading,
                 isError,
-                query
+                query,
+                firstTime
             )
         }
     }
@@ -352,7 +352,6 @@ fun NavGraphBuilder.bottomNavigation(
         Column(modifier = Modifier.padding(padding)) {
             Locations(navController = navController)
         }
-
     }
 }
 
